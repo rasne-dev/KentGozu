@@ -8,5 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: '/KentGozu/', // GitHub Pages repo kök dizini
+  base: process.env.BUILD_TARGET === 'android' ? './' : '/KentGozu/',
 })
