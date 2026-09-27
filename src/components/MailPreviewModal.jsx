@@ -43,6 +43,10 @@ export default function MailPreviewModal({
     timeStyle: 'short'
   });
 
+  const attachmentSection = photoAttached
+    ? `\n■ EKLER:\n- Durumu gösteren fotoğraf ek olarak iliştirilmiştir.\n`
+    : '';
+
   const body = `Sayın İlgili Kurum ve Belediye Yetkilileri,
 
 3071 sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun kapsamında, aşağıda detayları, adresi ve koordinatları belirtilen kentsel aksaklığın incelenerek ivedilikle giderilmesini arz ve talep ederim.
@@ -57,14 +61,11 @@ export default function MailPreviewModal({
 - Açık Adres / Mahalle: ${locationData.fullAddress || 'Adres bilgisi harita linkindedir.'}
 - GPS Koordinatları: ${locationData.latitude && locationData.longitude ? `${locationData.latitude}, ${locationData.longitude}` : 'Belirtilmedi'}
 - Google Haritalar Konumu: ${mapLink}
-
-■ EK BİLGİ:
-${photoAttached ? 'Durumu gösteren fotoğraf ek olarak iliştirilmiştir.' : 'Görsel eklenmemiştir, koordinat konumundan incelenebilir.'}
-
+${attachmentSection}
 Gereğinin yapılmasını ve konu hakkında tarafıma e-posta yoluyla bilgi verilmesini saygılarımla arz ederim.
 
 ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
-(KentGözü ile hazırlanmıştır)`;
+(KentGözü ile hazırlanmıştır)}`;
 
   const mailtoUrl = `mailto:${primaryEmail}?${ccEmails ? `cc=${encodeURIComponent(ccEmails)}&` : ''}subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
