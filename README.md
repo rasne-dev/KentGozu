@@ -4,7 +4,7 @@
 > *Sivil katılımı artıran, konuma ve yetki alanına göre doğru kamu kurumuna (Karayolları, İBB, İlçe Belediyeleri) otomatik taslak hazırlayan açık kaynaklı web uygulaması.*
 
 [![Canlı Uygulama](https://img.shields.io/badge/Canl%C4%B1%20Site-KentG%C3%B6z%C3%BC-blue?style=flat-square)](https://rasne-dev.github.io/KentGozu/)
-[![Lisans: MIT](https://img.shields.io/badge/Lisans-MIT-emerald.svg?style=flat-square)](LICENSE)
+[![Lisans: GPL-3.0](https://img.shields.io/badge/Lisans-GPL--3.0-blue.svg?style=flat-square)](LICENSE)
 
 ---
 
@@ -37,4 +37,4 @@ Vatandaşların sokakta karşılaştığı **yol çukurları, bozuk kaldırımla
 
 ## 📄 Lisans
 
-Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
+Bu proje [GNU General Public License v3.0 (GPL-3.0)](LICENSE) ile lisanslanmıştır.
