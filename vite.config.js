@@ -8,5 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: './', // GitHub Pages uyumluluğu için göreli yollar
+  base: '/KentGozu/', // GitHub Pages repo kök dizini
 })
