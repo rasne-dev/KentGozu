@@ -3,7 +3,32 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  html {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    background-color: #f8fafc;
+  }
+  html.dark {
+    background-color: #020617;
+    color: #f8fafc;
+  }
   body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    min-height: 100%;
+    background-color: #f8fafc;
+    color: #0f172a;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+  html.dark body {
+    background-color: #020617;
+    color: #f8fafc;
+  }
+  #root {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 }

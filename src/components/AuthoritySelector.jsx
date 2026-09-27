@@ -35,7 +35,7 @@ export default function AuthoritySelector({
                 className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                   isChecked
                     ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/50 shadow-xs ring-1 ring-blue-500/20'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850/50 opacity-70 hover:opacity-100'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 opacity-70 hover:opacity-100'
                 }`}
               >
                 <div className="flex items-start gap-3">

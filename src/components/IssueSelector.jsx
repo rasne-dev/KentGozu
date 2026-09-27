@@ -46,7 +46,7 @@ export default function IssueSelector({ selectedIssue, onSelectIssue }) {
               className={`p-3.5 rounded-xl border text-left transition-all relative flex flex-col justify-between gap-2 cursor-pointer ${
                 isSelected
                   ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/50 shadow-xs ring-2 ring-blue-500/30'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-850'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-800'
               }`}
             >
               <div className="flex items-start justify-between">

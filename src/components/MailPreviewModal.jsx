@@ -32,7 +32,7 @@ export default function MailPreviewModal({
   const districtTitle = locationData.districtName || 'İstanbul';
   const issueTitle = selectedIssue?.title || 'Kentsel Sorun / Yol Bozukluğu';
 
-  const subject = `[KentGözü] ${districtTitle} - ${issueTitle} Bildirimi`;
+  const subject = `${districtTitle} - ${issueTitle} Bildirimi`;
 
   const mapLink = locationData.latitude && locationData.longitude
     ? `https://www.google.com/maps?q=${locationData.latitude},${locationData.longitude}`
@@ -64,7 +64,7 @@ ${photoAttached ? 'Durumu gösteren fotoğraf ek olarak iliştirilmiştir.' : 'G
 Gereğinin yapılmasını ve konu hakkında tarafıma e-posta yoluyla bilgi verilmesini saygılarımla arz ederim.
 
 ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
-(Bu bildirim taslağı KentGözü Açık Kaynak Kentsel Katılım Platformu aracılığıyla oluşturulmuştur.)`;
+(KentGözü ile hazırlanmıştır)`;
 
   const mailtoUrl = `mailto:${primaryEmail}?${ccEmails ? `cc=${encodeURIComponent(ccEmails)}&` : ''}subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
@@ -83,7 +83,7 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
   const primaryAuthObj = authorities.find((a) => a.email === primaryEmail);
   const whatsappNum = primaryAuthObj?.whatsapp?.replace(/[^0-9]/g, '');
   const whatsappUrl = whatsappNum
-    ? `https://api.whatsapp.com/send?phone=${whatsappNum}&text=${encodeURIComponent(`[KentGözü Bildirimi]\n${subject}\n\n${body}`)}`
+    ? `https://api.whatsapp.com/send?phone=${whatsappNum}&text=${encodeURIComponent(`*${subject}*\n\n${body}`)}`
     : null;
 
   const whatsappInstitutionName = primaryAuthObj?.district 
@@ -182,7 +182,7 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
         </div>
 
         {/* Modal Actions */}
-        <div className="bg-slate-50 dark:bg-slate-850 px-5 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="bg-slate-50 dark:bg-slate-900 px-5 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <button
             type="button"
             onClick={onClose}

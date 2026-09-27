@@ -63,7 +63,7 @@ export default function LegalNoticeModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-850 px-5 py-3 border-t border-slate-200 dark:border-slate-800 text-right">
+        <div className="bg-slate-50 dark:bg-slate-900 px-5 py-3 border-t border-slate-200 dark:border-slate-800 text-right">
           <button
             onClick={onClose}
             className="px-4 py-2 bg-slate-900 dark:bg-slate-800 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors cursor-pointer border border-slate-700"
