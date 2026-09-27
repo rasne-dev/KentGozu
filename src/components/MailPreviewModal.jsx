@@ -86,6 +86,10 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
     ? `https://api.whatsapp.com/send?phone=${whatsappNum}&text=${encodeURIComponent(`[KentGözü Bildirimi]\n${subject}\n\n${body}`)}`
     : null;
 
+  const whatsappInstitutionName = primaryAuthObj?.district 
+    ? `${primaryAuthObj.district} Bel.` 
+    : (primaryAuthObj?.shortName || primaryAuthObj?.name || '');
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150 transition-colors">
@@ -196,7 +200,7 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
                 className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>WhatsApp İhbar</span>
+                <span>WhatsApp İhbar{whatsappInstitutionName ? ` (${whatsappInstitutionName})` : ''}</span>
               </a>
             )}
 
