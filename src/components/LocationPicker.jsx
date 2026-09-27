@@ -268,7 +268,7 @@ export default function LocationPicker({
               className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
             >
               <Edit3 className="w-3 h-3" />
-              <span>{isManualDetailsOpen ? 'Detayları Gizle' : 'Nokta Atışı Düzelt'}</span>
+              <span>{isManualDetailsOpen ? 'Detayları Gizle' : 'Konumu Düzelt'}</span>
             </button>
           </div>
           <input
@@ -283,13 +283,13 @@ export default function LocationPicker({
         </div>
       </div>
 
-      {/* Nokta Atışı Adres Düzeltme Paneli */}
+      {/* Konumu Düzelt / Detaylandırma Paneli */}
       {isManualDetailsOpen && (
         <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 rounded-xl space-y-3 animate-in fade-in duration-150">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-blue-950 dark:text-blue-200 flex items-center gap-1">
               <Edit3 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              Nokta Atışı Adres Bilgilerini Detaylandırın
+              Konum ve Adres Bilgilerini Detaylandırın
             </span>
             <span className="text-[11px] text-blue-600 dark:text-blue-400">
               Belediye ekiplerinin noktayı tam bulması için
