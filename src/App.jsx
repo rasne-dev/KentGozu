@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import ReportForm from './components/ReportForm';
 import DirectoryView from './components/DirectoryView';
-import LiveIssueMap from './components/LiveIssueMap';
 import LegalNoticeModal from './components/LegalNoticeModal';
 import CookieBanner from './components/CookieBanner';
 import { Eye, Scale } from 'lucide-react';
@@ -50,13 +49,9 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {activeTab === 'report' && (
+        {activeTab === 'report' ? (
           <ReportForm preselectedDistrict={preselectedDistrict} />
-        )}
-        {activeTab === 'map' && (
-          <LiveIssueMap onReportSimilarIssue={() => setActiveTab('report')} />
-        )}
-        {activeTab === 'directory' && (
+        ) : (
           <DirectoryView onSelectDistrictForReport={handleSelectDistrictForReport} />
         )}
       </main>

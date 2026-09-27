@@ -44,18 +44,6 @@ export default function Header({ activeTab, setActiveTab, onOpenLegal, darkMode,
             </button>
 
             <button
-              onClick={() => setActiveTab('map')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'map'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Canlı Harita</span>
-            </button>
-
-            <button
               onClick={() => setActiveTab('directory')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'directory'
