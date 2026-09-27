@@ -9,14 +9,13 @@ export default function PhotoUploader({ photoData, setPhotoData }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Fotoğraf önizleme oluştur
     const reader = new FileReader();
     reader.onload = (event) => {
       setPhotoData({
         file,
         previewUrl: event.target.result,
         name: file.name,
-        size: (file.size / (1024 * 1024)).toFixed(2) // MB
+        size: (file.size / (1024 * 1024)).toFixed(2)
       });
     };
     reader.readAsDataURL(file);
@@ -32,7 +31,6 @@ export default function PhotoUploader({ photoData, setPhotoData }) {
   const copyPhotoToClipboard = async () => {
     if (!photoData?.file) return;
     try {
-      // Destekleyen modern tarayıcılarda panoya kopyalama
       const item = new ClipboardItem({ [photoData.file.type]: photoData.file });
       await navigator.clipboard.write([item]);
       setCopied(true);
@@ -44,18 +42,18 @@ export default function PhotoUploader({ photoData, setPhotoData }) {
   };
 
   return (
-    <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+    <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 transition-colors">
       <div className="flex items-center justify-between">
         <div>
-          <label className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-            <Camera className="w-4 h-4 text-blue-600" />
+          <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            <Camera className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             3. Fotoğraf Ekle / Çek
           </label>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Sorunun durumunu gösteren net bir fotoğraf yetkili kurumun hızla müdahale etmesini sağlar.
           </p>
         </div>
-        <span className="text-xs text-slate-400 font-medium">Opsiyonel / Tavsiye Edilen</span>
+        <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Opsiyonel / Tavsiye Edilen</span>
       </div>
 
       <input
@@ -71,22 +69,22 @@ export default function PhotoUploader({ photoData, setPhotoData }) {
       {!photoData ? (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-slate-200 hover:border-blue-400 bg-slate-50/60 hover:bg-blue-50/40 rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+          className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-blue-50/40 dark:hover:bg-slate-800 rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
         >
-          <div className="w-12 h-12 rounded-xl bg-white shadow-xs border border-slate-200 flex items-center justify-center text-slate-600 group-hover:text-blue-600 group-hover:border-blue-200 transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:border-blue-200 transition-colors">
             <Camera className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               Fotoğraf Çek veya Galeriden Yükle
             </p>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               JPG, PNG veya WebP formatında
             </p>
           </div>
         </div>
       ) : (
-        <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-950 flex flex-col sm:flex-row items-center gap-4 p-3 text-white">
+        <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 flex flex-col sm:flex-row items-center gap-4 p-3 text-white">
           <div className="relative w-full sm:w-36 h-36 shrink-0 rounded-lg overflow-hidden bg-black/40">
             <img
               src={photoData.previewUrl}
@@ -140,9 +138,8 @@ export default function PhotoUploader({ photoData, setPhotoData }) {
         </div>
       )}
 
-      {/* KVKK / Gizlilik uyarısı */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-[11px] text-slate-600">
-        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+      <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 rounded-xl text-[11px] text-slate-600 dark:text-slate-400">
+        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
         <span>
           <strong>Kişisel Gizlilik:</strong> Fotoğrafta üçüncü şahısların yüzlerinin ve özel araç plakalarının görünmemesine özen gösteriniz.
         </span>

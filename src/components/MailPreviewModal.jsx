@@ -7,9 +7,7 @@ import {
   ExternalLink, 
   MessageSquare, 
   FileText, 
-  Eye, 
-  AlertTriangle,
-  Sparkles
+  AlertTriangle
 } from 'lucide-react';
 
 export default function MailPreviewModal({
@@ -28,7 +26,6 @@ export default function MailPreviewModal({
 
   if (!isOpen) return null;
 
-  // Birincil ve ikincil alıcılar
   const primaryEmail = selectedEmails[0] || 'beyazmasa@ibb.gov.tr';
   const ccEmails = selectedEmails.slice(1).join(',');
 
@@ -73,7 +70,6 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
 
   const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(primaryEmail)}${ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : ''}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-  // Panoya Kopyala
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(body);
@@ -84,7 +80,6 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
     }
   };
 
-  // WhatsApp seçeneği (eğer birincil kurumun WhatsApp hattı varsa)
   const primaryAuthObj = authorities.find((a) => a.email === primaryEmail);
   const whatsappNum = primaryAuthObj?.whatsapp?.replace(/[^0-9]/g, '');
   const whatsappUrl = whatsappNum
@@ -92,8 +87,8 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
     : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150 transition-colors">
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-4 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -118,43 +113,43 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
         {/* Modal Content */}
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Gönderilecek Adresler Özeti */}
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5 text-xs">
+          <div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5 text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-500 w-16">Kime (To):</span>
-              <span className="font-mono font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+              <span className="font-semibold text-slate-500 dark:text-slate-400 w-16">Kime (To):</span>
+              <span className="font-mono font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/70 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">
                 {primaryEmail}
               </span>
             </div>
             {ccEmails && (
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-500 w-16">Bilgi (CC):</span>
-                <span className="font-mono text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200 truncate">
+                <span className="font-semibold text-slate-500 dark:text-slate-400 w-16">Bilgi (CC):</span>
+                <span className="font-mono text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 truncate">
                   {ccEmails}
                 </span>
               </div>
             )}
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-500 w-16">Konu:</span>
-              <span className="font-medium text-slate-800">{subject}</span>
+              <span className="font-semibold text-slate-500 dark:text-slate-400 w-16">Konu:</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">{subject}</span>
             </div>
           </div>
 
           {/* Mail Metni Önizlemesi */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                <FileText className="w-3.5 h-3.5 text-blue-600" />
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 Dilekçe & Şikayet Metni Önizlemesi:
               </span>
               <button
                 type="button"
                 onClick={handleCopy}
-                className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer"
               >
                 {copied ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-emerald-600 font-semibold">Kopyalandı!</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Kopyalandı!</span>
                   </>
                 ) : (
                   <>
@@ -168,13 +163,13 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
               readOnly
               rows={11}
               value={body}
-              className="w-full p-3 bg-slate-50 font-sans text-xs text-slate-700 rounded-xl border border-slate-200 focus:outline-none resize-none leading-relaxed"
+              className="w-full p-3 bg-slate-50 dark:bg-slate-950 font-sans text-xs text-slate-700 dark:text-slate-300 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none resize-none leading-relaxed"
             />
           </div>
 
           {photoAttached && (
-            <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-xs text-amber-900 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <div>
                 <strong>Fotoğrafı Eklemeyi Unutmayın:</strong> E-posta uygulamanız açıldığında çektiğiniz fotoğrafı mailinize <em>"Dosya Ekle" (Attachment)</em> butonuyla ekleyiniz.
               </div>
@@ -183,11 +178,11 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
         </div>
 
         {/* Modal Actions */}
-        <div className="bg-slate-50 px-5 py-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="bg-slate-50 dark:bg-slate-850 px-5 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
           >
             Kapat ve Düzenle
           </button>

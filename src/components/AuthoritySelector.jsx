@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, Check, Mail, Phone, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Building2, Check, Mail, Phone } from 'lucide-react';
 
 export default function AuthoritySelector({
   authorities,
@@ -7,21 +7,21 @@ export default function AuthoritySelector({
   toggleEmailSelection
 }) {
   return (
-    <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+    <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 transition-colors">
       <div className="flex items-center justify-between">
         <div>
-          <label className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-            <Building2 className="w-4 h-4 text-blue-600" />
+          <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             4. Yetkili Kurumlar & İletişim Adresleri
           </label>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Seçtiğiniz sorun ve yol yetki alanına göre otomatik belirlenen ilgili kurumlar:
           </p>
         </div>
       </div>
 
       {authorities.length === 0 ? (
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 text-center">
+        <div className="p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 text-center">
           Lütfen yukarıdan ilçe veya yol sorumluluk tipini seçiniz.
         </div>
       ) : (
@@ -34,8 +34,8 @@ export default function AuthoritySelector({
                 onClick={() => toggleEmailSelection(auth.email)}
                 className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                   isChecked
-                    ? 'border-blue-600 bg-blue-50/50 shadow-xs'
-                    : 'border-slate-200 bg-slate-50/50 opacity-70 hover:opacity-100'
+                    ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/50 shadow-xs ring-1 ring-blue-500/20'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850/50 opacity-70 hover:opacity-100'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -43,7 +43,7 @@ export default function AuthoritySelector({
                     className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-colors ${
                       isChecked
                         ? 'bg-blue-600 border-blue-600 text-white'
-                        : 'border-slate-300 bg-white'
+                        : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800'
                     }`}
                   >
                     {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -51,25 +51,25 @@ export default function AuthoritySelector({
 
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h5 className="text-sm font-bold text-slate-900">
+                      <h5 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                         {auth.name}
                       </h5>
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                         auth.isPrimary
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                          : 'bg-slate-100 text-slate-700 border border-slate-200'
+                          ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                       }`}>
                         {auth.role || 'Yetkili Kurum'}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-slate-600 mt-1 flex-wrap">
-                      <span className="inline-flex items-center gap-1 font-mono text-blue-700 font-medium">
+                    <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400 mt-1 flex-wrap">
+                      <span className="inline-flex items-center gap-1 font-mono text-blue-700 dark:text-blue-400 font-medium">
                         <Mail className="w-3 h-3" />
                         {auth.email}
                       </span>
                       {auth.phone && (
-                        <span className="inline-flex items-center gap-1 text-slate-500">
+                        <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400">
                           <Phone className="w-3 h-3" />
                           {auth.phone}
                         </span>
@@ -77,7 +77,7 @@ export default function AuthoritySelector({
                     </div>
 
                     {auth.description && (
-                      <p className="text-[11px] text-slate-500 mt-1">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                         {auth.description}
                       </p>
                     )}
@@ -85,7 +85,7 @@ export default function AuthoritySelector({
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
                     {isChecked ? 'Gönderim Listesinde' : 'Hariç Tutuldu'}
                   </span>
                 </div>
