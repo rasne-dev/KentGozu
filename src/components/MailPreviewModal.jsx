@@ -20,7 +20,7 @@ export default function MailPreviewModal({
   userName,
   selectedEmails,
   authorities,
-  photoAttached
+  photoCount = 0
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -43,8 +43,8 @@ export default function MailPreviewModal({
     timeStyle: 'short'
   });
 
-  const attachmentSection = photoAttached
-    ? `\n■ EKLER:\n- Durumu gösteren fotoğraf ek olarak iliştirilmiştir.\n`
+  const attachmentSection = photoCount > 0
+    ? `\n■ EKLER:\n- Olay yerini gösteren ${photoCount > 1 ? `${photoCount} adet fotoğraf` : 'fotoğraf'} ek olarak iliştirilmiştir.\n`
     : '';
 
   const body = `Sayın İlgili Kurum ve Belediye Yetkilileri,
@@ -172,11 +172,11 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
             />
           </div>
 
-          {photoAttached && (
+          {photoCount > 0 && (
             <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <strong>Fotoğrafı Eklemeyi Unutmayın:</strong> E-posta uygulamanız açıldığında çektiğiniz fotoğrafı mailinize <em>"Dosya Ekle" (Attachment)</em> butonuyla ekleyiniz.
+                <strong>{photoCount > 1 ? `${photoCount} Adet Fotoğrafı Eklemeyi Unutmayın:` : 'Fotoğrafı Eklemeyi Unutmayın:'}</strong> E-posta uygulamanız açıldığında seçtiğiniz {photoCount > 1 ? 'fotoğrafları' : 'fotoğrafı'} mailinize <em>"Dosya Ekle" (Attachment)</em> butonuyla ekleyiniz.
               </div>
             </div>
           )}

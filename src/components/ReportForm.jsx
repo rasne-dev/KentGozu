@@ -32,7 +32,7 @@ export default function ReportForm({ preselectedDistrict }) {
     isDetected: false
   });
   const [roadType, setRoadType] = useState('neighborhood');
-  const [photoData, setPhotoData] = useState(null);
+  const [photos, setPhotos] = useState([]);
   const [userNote, setUserNote] = useState('');
   const [userName, setUserName] = useState('');
   const [isDisclaimerAccepted, setIsDisclaimerAccepted] = useState(false);
@@ -146,8 +146,8 @@ export default function ReportForm({ preselectedDistrict }) {
 
         {/* Adım 3: Fotoğraf */}
         <PhotoUploader
-          photoData={photoData}
-          setPhotoData={setPhotoData}
+          photos={photos}
+          setPhotos={setPhotos}
         />
 
         {/* Adım 4: Açıklama ve Vatandaş Bilgisi */}
@@ -294,7 +294,7 @@ export default function ReportForm({ preselectedDistrict }) {
         userName={userName}
         selectedEmails={selectedEmails}
         authorities={authorities}
-        photoAttached={Boolean(photoData)}
+        photoCount={photos.length}
       />
     </div>
   );
