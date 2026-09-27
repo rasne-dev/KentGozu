@@ -9,7 +9,9 @@ import {
   Trash2, 
   Trees, 
   HelpCircle,
-  Check
+  Check,
+  TrafficCone,
+  PawPrint
 } from 'lucide-react';
 
 const iconMap = {
@@ -20,6 +22,8 @@ const iconMap = {
   Lightbulb,
   Trash2,
   Trees,
+  TrafficCone,
+  PawPrint,
   HelpCircle
 };
 

@@ -56,6 +56,22 @@ export const ISSUE_TYPES = [
     placeholder: 'Örn: Yol kenarındaki kurumuş kalın ağaç dalı sarkmış veya çocuk parkındaki salıncak kırılmış.'
   },
   {
+    id: 'trafik_isik',
+    title: 'Trafik Işığı & Sinyalizasyon Arızası',
+    icon: 'TrafficCone',
+    badge: 'Trafik & Sinyal',
+    color: 'red',
+    placeholder: 'Örn: Kavşaktaki trafik lambası yanmıyor veya sürekli kırmızıda takılı kalmış, kaza tehlikesi yaratıyor.'
+  },
+  {
+    id: 'sokak_hayvanlari',
+    title: 'Yaralı Sokak Hayvanı & İlaçlama',
+    icon: 'PawPrint',
+    badge: 'Veterinerlik & Sağlık',
+    color: 'teal',
+    placeholder: 'Örn: Sokakta acil tedaviye muhtaç yaralı bir kedi/köpek bulunuyor veya çevre sağlığı için ilaçlama gerekiyor.'
+  },
+  {
     id: 'diger',
     title: 'Diğer Kentsel Aksaklık',
     icon: 'HelpCircle',

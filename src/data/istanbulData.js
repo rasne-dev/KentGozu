@@ -563,6 +563,22 @@ export function determineResponsibleAuthorities({
       role: `İhtisas Yetkilisi (${districtObj?.side || 'İstanbul'} Elektrik & Aydınlatma Dağıtım)`,
       isPrimary: true
     });
+  } else if (issueTypeId === 'trafik_isik') {
+    // Sinyalizasyon ve trafik ışıkları İBB Trafik Müdürlüğü yetkisindedir
+    selectedAuthorities.unshift({
+      ...IBB_INFO,
+      role: 'Birincil Yetkili (İBB Trafik & Sinyalizasyon İdaresi)',
+      isPrimary: true
+    });
+  } else if (issueTypeId === 'sokak_hayvanlari') {
+    // Sokak hayvanları ve ilaçlama için İlçe Belediyesi Veterinerlik İşleri
+    if (districtObj) {
+      selectedAuthorities.unshift({
+        ...districtObj,
+        role: `Birincil Yetkili (${districtObj.district} Bel. Veterinerlik & Sağlık İşleri)`,
+        isPrimary: true
+      });
+    }
   }
 
   // Duplicate id engelleme
