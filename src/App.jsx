@@ -6,6 +6,7 @@ import LegalNoticeModal from './components/LegalNoticeModal';
 import CookieBanner from './components/CookieBanner';
 import MobileAppPrompt from './components/MobileAppPrompt';
 import { Eye, Scale, Smartphone } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('report');
@@ -16,7 +17,7 @@ export default function App() {
   useEffect(() => {
     // Sadece mobil tarayıcıda ve daha önce görmemiş olanlara göster
     // Capacitor native platform içinde çalışıyorsa gösterme
-    const isNative = window.Capacitor?.isNativePlatform?.() || false;
+    const isNative = Capacitor.isNativePlatform();
     const isMobile = typeof window !== 'undefined' && (
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
       window.innerWidth < 768

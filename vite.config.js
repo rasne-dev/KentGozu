@@ -8,5 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: process.env.BUILD_TARGET === 'android' ? './' : '/KentGozu/',
+  base: './',
 })
