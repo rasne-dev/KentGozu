@@ -3,6 +3,7 @@ import Header from './components/Header';
 import ReportForm from './components/ReportForm';
 import DirectoryView from './components/DirectoryView';
 import LegalNoticeModal from './components/LegalNoticeModal';
+import CookieBanner from './components/CookieBanner';
 import { Eye, Scale } from 'lucide-react';
 
 export default function App() {
@@ -100,6 +101,9 @@ export default function App() {
         isOpen={isLegalModalOpen}
         onClose={() => setIsLegalModalOpen(false)}
       />
+
+      {/* Cookie & Transparency Banner */}
+      <CookieBanner onOpenLegal={() => setIsLegalModalOpen(true)} />
     </div>
   );
 }
