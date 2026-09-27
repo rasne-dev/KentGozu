@@ -555,12 +555,14 @@ export function determineResponsibleAuthorities({
       role: 'İhtisas Yetkilisi (Kanalizasyon & Yağmursuyu Mazgal İdaresi)',
       isPrimary: true
     });
-  } else if (issueTypeId === 'aydinlatma_direk') {
-    // Sokak aydınlatması için Elektrik Dağıtım Şirketi (BEDAŞ / AYEDAŞ)
+  } else if (issueTypeId === 'aydinlatma_direk' || issueTypeId === 'elektrik_kablo_pano') {
+    // Sokak aydınlatması ve açık elektrik/hasarlı pano için Elektrik Dağıtım Şirketi (BEDAŞ / AYEDAŞ)
     const elecCompany = ELECTRICITY_COMPANIES[side];
     selectedAuthorities.unshift({
       ...elecCompany,
-      role: `İhtisas Yetkilisi (${districtObj?.side || 'İstanbul'} Elektrik & Aydınlatma Dağıtım)`,
+      role: issueTypeId === 'elektrik_kablo_pano'
+        ? `Acil İhtisas Yetkilisi (${districtObj?.side || 'İstanbul'} Elektrik Şebeke İdaresi)`
+        : `İhtisas Yetkilisi (${districtObj?.side || 'İstanbul'} Elektrik & Aydınlatma Dağıtım)`,
       isPrimary: true
     });
   } else if (issueTypeId === 'trafik_isik') {
@@ -570,12 +572,62 @@ export function determineResponsibleAuthorities({
       role: 'Birincil Yetkili (İBB Trafik & Sinyalizasyon İdaresi)',
       isPrimary: true
     });
-  } else if (issueTypeId === 'sokak_hayvanlari') {
-    // Sokak hayvanları ve ilaçlama için İlçe Belediyesi Veterinerlik İşleri
+  } else if (issueTypeId === 'yarali_hayvan') {
+    // Yaralı ve acil tedaviye muhtaç sokak hayvanları
     if (districtObj) {
       selectedAuthorities.unshift({
         ...districtObj,
-        role: `Birincil Yetkili (${districtObj.district} Bel. Veterinerlik & Sağlık İşleri)`,
+        role: `Acil Yetkili (${districtObj.district} Bel. Veterinerlik & Acil Müdahale)`,
+        isPrimary: true
+      });
+    }
+  } else if (issueTypeId === 'basibos_hayvan') {
+    // Başıboş ve saldırgan sahipsiz hayvan ihbarı
+    if (districtObj) {
+      selectedAuthorities.unshift({
+        ...districtObj,
+        role: `Birincil Yetkili (${districtObj.district} Bel. Veterinerlik & Zabıta Müdürlüğü)`,
+        isPrimary: true
+      });
+    }
+  } else if (issueTypeId === 'hasere_ilaclama') {
+    // Haşere ve sivrisinek ilaçlama
+    if (districtObj) {
+      selectedAuthorities.unshift({
+        ...districtObj,
+        role: `Birincil Yetkili (${districtObj.district} Bel. Çevre Koruma & Temizlik İşleri)`,
+        isPrimary: true
+      });
+    }
+  } else if (issueTypeId === 'altyapi_kazi') {
+    // Kapatılmamış altyapı kazısı (İBB AYKOME koordinasyonu)
+    selectedAuthorities.unshift({
+      ...IBB_INFO,
+      role: 'Altyapı Denetim (İBB AYKOME - Altyapı Koordinasyon)',
+      isPrimary: true
+    });
+    if (districtObj) {
+      selectedAuthorities.push({
+        ...districtObj,
+        role: `Saha Denetim (${districtObj.district} Bel. Fen İşleri)`,
+        isPrimary: false
+      });
+    }
+  } else if (issueTypeId === 'metruk_bina') {
+    // Metruk bina ve yıkılma tehlikesi
+    if (districtObj) {
+      selectedAuthorities.unshift({
+        ...districtObj,
+        role: `Birincil Yetkili (${districtObj.district} Bel. İmar ve Şehircilik Müdürlüğü)`,
+        isPrimary: true
+      });
+    }
+  } else if (issueTypeId === 'gida_ruhsat') {
+    // Gıda hijyeni ve seyyar satıcı denetimi
+    if (districtObj) {
+      selectedAuthorities.unshift({
+        ...districtObj,
+        role: `Birincil Yetkili (${districtObj.district} Bel. Zabıta ve Ruhsat Denetim)`,
         isPrimary: true
       });
     }

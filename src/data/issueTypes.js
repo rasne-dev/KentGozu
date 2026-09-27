@@ -60,16 +60,64 @@ export const ISSUE_TYPES = [
     title: 'Trafik Işığı & Sinyalizasyon Arızası',
     icon: 'TrafficCone',
     badge: 'Trafik & Sinyal',
-    color: 'red',
+    color: 'rose',
     placeholder: 'Örn: Kavşaktaki trafik lambası yanmıyor veya sürekli kırmızıda takılı kalmış, kaza tehlikesi yaratıyor.'
   },
   {
-    id: 'sokak_hayvanlari',
-    title: 'Yaralı Sokak Hayvanı & İlaçlama',
+    id: 'elektrik_kablo_pano',
+    title: 'Açık Elektrik Kablosu & Hasarlı Pano',
+    icon: 'Zap',
+    badge: 'Hayati Tehlike',
+    color: 'amber',
+    placeholder: 'Örn: Sokakta elektrik panosunun kapağı açık/kırık veya direkten yere açıkta kablo sarkıyor, can güvenliği riski yaratıyor.'
+  },
+  {
+    id: 'yarali_hayvan',
+    title: 'Yaralı / Hasta Sokak Hayvanı',
     icon: 'PawPrint',
-    badge: 'Veterinerlik & Sağlık',
+    badge: 'Acil Veterinerlik',
+    color: 'rose',
+    placeholder: 'Örn: Sokakta acil tıbbi müdahaleye muhtaç, yaralanmış veya hasta bir sokak hayvanı bulunmaktadır.'
+  },
+  {
+    id: 'basibos_hayvan',
+    title: 'Başıboş / Saldırgan Hayvan İhbarı',
+    icon: 'Dog',
+    badge: 'Rehabilitasyon',
+    color: 'orange',
+    placeholder: 'Örn: Mahallede sürüleşerek yayalara ve çocuklara karşı saldırganlık gösteren sahipsiz köpekler bulunuyor.'
+  },
+  {
+    id: 'hasere_ilaclama',
+    title: 'Haşere, Sivrisinek & İlaçlama Talebi',
+    icon: 'Bug',
+    badge: 'Çevre Sağlığı',
     color: 'teal',
-    placeholder: 'Örn: Sokakta acil tedaviye muhtaç yaralı bir kedi/köpek bulunuyor veya çevre sağlığı için ilaçlama gerekiyor.'
+    placeholder: 'Örn: Sokakta ve rögarlarda aşırı sivrisinek, kene veya zararlı haşere artışı var; periyodik sokak ilaçlaması talep ediyoruz.'
+  },
+  {
+    id: 'altyapi_kazi',
+    title: 'Kapatılmamış Altyapı Kazısı & Hendek',
+    icon: 'Construction',
+    badge: 'Altyapı & AYKOME',
+    color: 'yellow',
+    placeholder: 'Örn: Altyapı kazı çalışması tamamlandığı halde çukur asfaltlanmadan toprak ve moloz halinde bırakılmış, araç ve yaya trafiğini engelliyor.'
+  },
+  {
+    id: 'metruk_bina',
+    title: 'Metruk Bina & Çökme / Güvenlik Tehlikesi',
+    icon: 'Building',
+    badge: 'İmar & Güvenlik',
+    color: 'slate',
+    placeholder: 'Örn: Sokakta her an yola çökme tehlikesi olan terk edilmiş metruk yapı can ve mal güvenliğini tehdit ediyor.'
+  },
+  {
+    id: 'gida_ruhsat',
+    title: 'Gıda Hijyeni & Ruhsatsız İşletme / Seyyar',
+    icon: 'Utensils',
+    badge: 'Zabıta & Denetim',
+    color: 'blue',
+    placeholder: 'Örn: Hijyen kurallarına uymayan işletme veya izinsiz/ruhsatsız seyyar satıcı faaliyet göstermektedir.'
   },
   {
     id: 'diger',
