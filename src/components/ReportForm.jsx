@@ -25,6 +25,8 @@ export default function ReportForm({ preselectedDistrict }) {
     districtName: preselectedDistrict ? preselectedDistrict.district : '',
     neighbourhood: '',
     road: '',
+    buildingNo: '',
+    landmark: '',
     fullAddress: '',
     isDetected: false
   });

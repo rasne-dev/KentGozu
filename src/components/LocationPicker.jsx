@@ -9,7 +9,10 @@ import {
   Building2, 
   Home, 
   HelpCircle,
-  CheckCircle2
+  CheckCircle2,
+  Edit3,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { ISTANBUL_DISTRICTS, ROAD_TYPES, findDistrictByName } from '../data/istanbulData';
 
@@ -21,6 +24,28 @@ export default function LocationPicker({
 }) {
   const [loading, setLoading] = useState(false);
   const [geoError, setGeoError] = useState(null);
+  const [isManualDetailsOpen, setIsManualDetailsOpen] = useState(false);
+
+  // Adresi parçalardan otomatik birleştir
+  const updateAddressComponent = (field, value) => {
+    setLocationData((prev) => {
+      const updated = { ...prev, [field]: value };
+      
+      // Parçalardan açık adresi derle
+      const parts = [
+        updated.road,
+        updated.buildingNo ? `No: ${updated.buildingNo}` : '',
+        updated.neighbourhood,
+        updated.landmark ? `(${updated.landmark})` : '',
+        updated.districtName ? `${updated.districtName} / İstanbul` : 'İstanbul'
+      ].filter(Boolean);
+
+      return {
+        ...updated,
+        fullAddress: parts.join(', ')
+      };
+    });
+  };
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
@@ -56,23 +81,28 @@ export default function LocationPicker({
 
           const neighbourhood = addr.suburb || addr.neighbourhood || addr.quarter || addr.village || '';
           const road = addr.road || addr.pedestrian || addr.street || '';
+          const houseNumber = addr.house_number || '';
 
           const composedAddress = [
             road,
+            houseNumber ? `No: ${houseNumber}` : '',
             neighbourhood,
             matchedDistrict ? `${matchedDistrict.district} / İstanbul` : (rawDistrict || 'İstanbul')
           ].filter(Boolean).join(', ');
 
-          setLocationData({
+          setLocationData((prev) => ({
+            ...prev,
             latitude: latitude.toFixed(6),
             longitude: longitude.toFixed(6),
             districtObj: matchedDistrict || null,
             districtName: matchedDistrict ? matchedDistrict.district : (rawDistrict || ''),
             neighbourhood,
             road,
+            buildingNo: houseNumber,
+            landmark: prev.landmark || '',
             fullAddress: composedAddress || data.display_name,
             isDetected: true
-          });
+          }));
         } catch (err) {
           console.error('Tersine adresleme hatası:', err);
           setLocationData((prev) => ({
@@ -113,11 +143,27 @@ export default function LocationPicker({
   const handleDistrictChange = (e) => {
     const districtId = e.target.value;
     const selected = ISTANBUL_DISTRICTS.find((d) => d.id === districtId) || null;
-    setLocationData((prev) => ({
-      ...prev,
-      districtObj: selected,
-      districtName: selected ? selected.district : ''
-    }));
+    
+    setLocationData((prev) => {
+      const updated = {
+        ...prev,
+        districtObj: selected,
+        districtName: selected ? selected.district : ''
+      };
+      
+      const parts = [
+        updated.road,
+        updated.buildingNo ? `No: ${updated.buildingNo}` : '',
+        updated.neighbourhood,
+        updated.landmark ? `(${updated.landmark})` : '',
+        updated.districtName ? `${updated.districtName} / İstanbul` : 'İstanbul'
+      ].filter(Boolean);
+
+      return {
+        ...updated,
+        fullAddress: parts.join(', ')
+      };
+    });
   };
 
   return (
@@ -129,7 +175,7 @@ export default function LocationPicker({
             2. Konum ve Yol Yetki Alanı
           </label>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Yetkili kurum (İlçe Belediyesi, İBB veya Karayolları) konumunuza ve yol tipine göre otomatik seçilir.
+            Yetkili kurum (İlçe Belediyesi, İBB veya Karayolları) konumunuza ve yol tipine göre otomatik eşleşir.
           </p>
         </div>
 
@@ -180,6 +226,7 @@ export default function LocationPicker({
         </div>
       )}
 
+      {/* Ana Adres ve İlçe Satırı */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* İlçe Seçimi */}
         <div>
@@ -209,14 +256,24 @@ export default function LocationPicker({
           </select>
         </div>
 
-        {/* Mahalle / Cadde / Sokak */}
+        {/* Açık Adres / Mahalle / Cadde */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Mahalle / Sokak / Cadde:
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Açık Adres / Konum Tarifi:
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsManualDetailsOpen((prev) => !prev)}
+              className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+            >
+              <Edit3 className="w-3 h-3" />
+              <span>{isManualDetailsOpen ? 'Detayları Gizle' : 'Nokta Atışı Düzelt'}</span>
+            </button>
+          </div>
           <input
             type="text"
-            placeholder="Örn: Caferağa Mah. Moda Cad."
+            placeholder="Örn: Caferağa Mah. Moda Cad. No: 24 önü"
             value={locationData.fullAddress || ''}
             onChange={(e) =>
               setLocationData((prev) => ({ ...prev, fullAddress: e.target.value }))
@@ -225,6 +282,75 @@ export default function LocationPicker({
           />
         </div>
       </div>
+
+      {/* Nokta Atışı Adres Düzeltme Paneli */}
+      {isManualDetailsOpen && (
+        <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 rounded-xl space-y-3 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-blue-950 dark:text-blue-200 flex items-center gap-1">
+              <Edit3 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              Nokta Atışı Adres Bilgilerini Detaylandırın
+            </span>
+            <span className="text-[11px] text-blue-600 dark:text-blue-400">
+              Belediye ekiplerinin noktayı tam bulması için
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-0.5">
+                Mahalle:
+              </label>
+              <input
+                type="text"
+                placeholder="Örn: Caferağa Mah."
+                value={locationData.neighbourhood || ''}
+                onChange={(e) => updateAddressComponent('neighbourhood', e.target.value)}
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-0.5">
+                Cadde / Sokak:
+              </label>
+              <input
+                type="text"
+                placeholder="Örn: Moda Caddesi"
+                value={locationData.road || ''}
+                onChange={(e) => updateAddressComponent('road', e.target.value)}
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-0.5">
+                Bina / Kapı No:
+              </label>
+              <input
+                type="text"
+                placeholder="Örn: No: 18 / 2B"
+                value={locationData.buildingNo || ''}
+                onChange={(e) => updateAddressComponent('buildingNo', e.target.value)}
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-0.5">
+              Yakınındaki Tanınmış Referans / Tarif (Opsiyonel):
+            </label>
+            <input
+              type="text"
+              placeholder="Örn: Eczanenin tam önü, otobüs durağı yanı, fırının karşısındaki çukur"
+              value={locationData.landmark || ''}
+              onChange={(e) => updateAddressComponent('landmark', e.target.value)}
+              className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Yol Tipi / Yetki Alanı Seçimi */}
       <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
