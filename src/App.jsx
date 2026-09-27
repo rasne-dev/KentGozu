@@ -5,7 +5,7 @@ import DirectoryView from './components/DirectoryView';
 import LegalNoticeModal from './components/LegalNoticeModal';
 import CookieBanner from './components/CookieBanner';
 import MobileAppPrompt from './components/MobileAppPrompt';
-import { Eye, Scale, Smartphone } from 'lucide-react';
+import { Eye, Scale, Smartphone, ShieldCheck } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 export default function App() {
@@ -103,6 +103,15 @@ export default function App() {
               <Scale className="w-3.5 h-3.5" />
               <span>Yasal Haklar (Md. 74)</span>
             </button>
+            <a
+              href="https://rasne-dev.github.io/KentGozu/privacy-policy.html"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 font-medium"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Gizlilik Politikası</span>
+            </a>
             <a
               href="https://github.com/rasne-dev/KentGozu"
               target="_blank"

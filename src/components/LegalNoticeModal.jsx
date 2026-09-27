@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, Lock, AlertCircle } from 'lucide-react';
+import { Scale, Lock, AlertCircle, ShieldAlert, ExternalLink } from 'lucide-react';
 
 export default function LegalNoticeModal({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -21,6 +21,17 @@ export default function LegalNoticeModal({ isOpen, onClose }) {
         </div>
 
         <div className="p-5 space-y-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-h-[70vh] overflow-y-auto">
+          {/* Resmi Kurum Feragatnamesi (Google Play & Mevzuat Uyumluluğu) */}
+          <div className="p-3.5 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 rounded-xl space-y-1">
+            <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-bold text-sm">
+              <ShieldAlert className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
+              <span>Resmi Kurum ve Temsil Feragatnamesi</span>
+            </div>
+            <p className="text-amber-950 dark:text-amber-200 leading-relaxed font-medium">
+              Bu uygulama herhangi bir resmi kamu kurumunu veya belediyeyi temsil etmemektedir. Uygulama, vatandaşların anayasal dilekçe haklarını kullanarak kamuya açık resmi kurumsal e-posta adreslerine kentsel aksaklık bildirimi hazırlamasını kolaylaştıran bağımsız ve açık kaynaklı bir sivil katılım aracıdır.
+            </p>
+          </div>
+
           {/* Anayasa 74 */}
           <div className="p-3.5 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 rounded-xl space-y-1">
             <div className="flex items-center gap-2 text-blue-900 dark:text-blue-200 font-bold text-sm">
@@ -63,7 +74,17 @@ export default function LegalNoticeModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-900 px-5 py-3 border-t border-slate-200 dark:border-slate-800 text-right">
+        <div className="bg-slate-50 dark:bg-slate-900 px-5 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <a
+            href="https://rasne-dev.github.io/KentGozu/privacy-policy.html"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium inline-flex items-center gap-1"
+          >
+            <span>Gizlilik Politikası (Web Sayfası)</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+
           <button
             onClick={onClose}
             className="px-4 py-2 bg-slate-900 dark:bg-slate-800 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors cursor-pointer border border-slate-700"
