@@ -14,6 +14,7 @@ import PhotoUploader from './PhotoUploader';
 import AuthoritySelector from './AuthoritySelector';
 import MailPreviewModal from './MailPreviewModal';
 import { determineResponsibleAuthorities } from '../data/istanbulData';
+import { ISSUE_TYPES } from '../data/issueTypes';
 
 export default function ReportForm({ preselectedDistrict }) {
   // Form durumları
@@ -63,6 +64,18 @@ export default function ReportForm({ preselectedDistrict }) {
     setAuthorities(list);
     setSelectedEmails(list.map((a) => a.email));
   }, [locationData.districtObj, roadType, selectedIssue]);
+
+  const handleSelectIssue = (issue) => {
+    setSelectedIssue(issue);
+    if (issue) {
+      const sample = (issue.placeholder || '').replace(/^Örn:\s*/, '');
+      const sampleTexts = ISSUE_TYPES.map((i) => (i.placeholder || '').replace(/^Örn:\s*/, ''));
+      const isPreviousSample = sampleTexts.includes(userNote.trim());
+      if (!userNote.trim() || isPreviousSample) {
+        setUserNote(sample);
+      }
+    }
+  };
 
   const toggleEmailSelection = (email) => {
     setSelectedEmails((prev) => {
@@ -120,7 +133,7 @@ export default function ReportForm({ preselectedDistrict }) {
         {/* Adım 1: Sorun Türü */}
         <IssueSelector
           selectedIssue={selectedIssue}
-          onSelectIssue={setSelectedIssue}
+          onSelectIssue={handleSelectIssue}
         />
 
         {/* Adım 2: Konum ve Yol Sorumluluk Tipi */}
@@ -140,10 +153,40 @@ export default function ReportForm({ preselectedDistrict }) {
         {/* Adım 4: Açıklama ve Vatandaş Bilgisi */}
         <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 transition-colors">
           <div>
-            <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 mb-1">
-              <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              Sorun Açıklaması & Notunuz
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>Sorun Açıklaması & Notunuz</span>
+              </label>
+
+              {selectedIssue && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sample = (selectedIssue.placeholder || '').replace(/^Örn:\s*/, '');
+                      setUserNote(sample);
+                    }}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold inline-flex items-center gap-1 hover:underline cursor-pointer transition-colors"
+                    title="Seçili kategoriye özel örnek açıklamayı doldur"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Örnek Metni Doldur</span>
+                  </button>
+                  {userNote && (
+                    <button
+                      type="button"
+                      onClick={() => setUserNote('')}
+                      className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-medium cursor-pointer"
+                      title="Açıklamayı temizle"
+                    >
+                      Temizle
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             <textarea
               rows={3}
               placeholder={
@@ -154,6 +197,13 @@ export default function ReportForm({ preselectedDistrict }) {
               onChange={(e) => setUserNote(e.target.value)}
               className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none"
             />
+
+            {selectedIssue && userNote && (
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-blue-500 shrink-0" />
+                <span>Kategoriye özel örnek açıklama hazırlandı; dilediğiniz gibi düzenleyebilir veya detay ekleyebilirsiniz.</span>
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">

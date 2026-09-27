@@ -4,12 +4,30 @@ import ReportForm from './components/ReportForm';
 import DirectoryView from './components/DirectoryView';
 import LegalNoticeModal from './components/LegalNoticeModal';
 import CookieBanner from './components/CookieBanner';
-import { Eye, Scale } from 'lucide-react';
+import MobileAppPrompt from './components/MobileAppPrompt';
+import { Eye, Scale, Smartphone } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('report');
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [preselectedDistrict, setPreselectedDistrict] = useState(null);
+  const [showApkPrompt, setShowApkPrompt] = useState(false);
+
+  useEffect(() => {
+    // Sadece mobil tarayıcıda ve daha önce görmemiş olanlara göster
+    // Capacitor native platform içinde çalışıyorsa gösterme
+    const isNative = window.Capacitor?.isNativePlatform?.() || false;
+    const isMobile = typeof window !== 'undefined' && (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.innerWidth < 768
+    );
+    const alreadySeen = localStorage.getItem('kentgozu-apk-prompt-seen');
+
+    if (isMobile && !isNative && !alreadySeen) {
+      const timer = setTimeout(() => setShowApkPrompt(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Dark mode state
   const [darkMode, setDarkMode] = useState(() => {
@@ -68,6 +86,15 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/rasne-dev/KentGozu/releases/latest"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400"
+            >
+              <Smartphone className="w-4 h-4" />
+              <span>Android APK</span>
+            </a>
             <button
               onClick={() => setIsLegalModalOpen(true)}
               className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 cursor-pointer"
@@ -102,8 +129,17 @@ export default function App() {
         onClose={() => setIsLegalModalOpen(false)}
       />
 
+      {/* First-time Mobile APK Prompt */}
+      <MobileAppPrompt
+        isOpen={showApkPrompt}
+        onClose={() => setShowApkPrompt(false)}
+      />
+
       {/* Cookie & Transparency Banner */}
-      <CookieBanner onOpenLegal={() => setIsLegalModalOpen(true)} />
+      <CookieBanner 
+        onOpenLegal={() => setIsLegalModalOpen(true)} 
+        suppressed={showApkPrompt}
+      />
     </div>
   );
 }

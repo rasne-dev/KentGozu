@@ -10,7 +10,9 @@ import {
   Car, 
   Droplet, 
   Lightbulb, 
-  Send
+  Send,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { 
   ISTANBUL_DISTRICTS, 
@@ -22,6 +24,11 @@ import {
 export default function DirectoryView({ onSelectDistrictForReport }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sideFilter, setSideFilter] = useState('ALL');
+  const [expandedCards, setExpandedCards] = useState({});
+
+  const toggleCardExpand = (id) => {
+    setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const filteredDistricts = ISTANBUL_DISTRICTS.filter((d) => {
     const matchesSearch = d.district.toLowerCase().includes(searchTerm.toLowerCase());
@@ -58,7 +65,17 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                 <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">ALO 159</span>
               </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{KGM_INFO.name}</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{KGM_INFO.description}</p>
+              <p className={`text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed ${expandedCards['kgm'] ? '' : 'line-clamp-2'}`}>
+                {KGM_INFO.description}
+              </p>
+              <button
+                type="button"
+                onClick={() => toggleCardExpand('kgm')}
+                className="text-[11px] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mt-1 inline-flex items-center gap-0.5 cursor-pointer select-none"
+              >
+                <span>{expandedCards['kgm'] ? 'Daha Az Göster' : 'Devamını Göster'}</span>
+                {expandedCards['kgm'] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
             </div>
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 mt-3 flex items-center justify-between text-xs">
               <a
@@ -90,7 +107,17 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                 <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">ALO 153</span>
               </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{IBB_INFO.name}</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{IBB_INFO.description}</p>
+              <p className={`text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed ${expandedCards['ibb'] ? '' : 'line-clamp-2'}`}>
+                {IBB_INFO.description}
+              </p>
+              <button
+                type="button"
+                onClick={() => toggleCardExpand('ibb')}
+                className="text-[11px] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mt-1 inline-flex items-center gap-0.5 cursor-pointer select-none"
+              >
+                <span>{expandedCards['ibb'] ? 'Daha Az Göster' : 'Devamını Göster'}</span>
+                {expandedCards['ibb'] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
             </div>
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 mt-3 flex items-center justify-between text-xs">
               <a
@@ -115,7 +142,17 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                 <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">ALO 185</span>
               </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{ISKI_INFO.name}</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{ISKI_INFO.description}</p>
+              <p className={`text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed ${expandedCards['iski'] ? '' : 'line-clamp-2'}`}>
+                {ISKI_INFO.description}
+              </p>
+              <button
+                type="button"
+                onClick={() => toggleCardExpand('iski')}
+                className="text-[11px] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mt-1 inline-flex items-center gap-0.5 cursor-pointer select-none"
+              >
+                <span>{expandedCards['iski'] ? 'Daha Az Göster' : 'Devamını Göster'}</span>
+                {expandedCards['iski'] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
             </div>
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 mt-3 flex items-center justify-between text-xs">
               <a

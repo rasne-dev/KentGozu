@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Building2, ShieldCheck, AlertCircle, Sun, Moon } from 'lucide-react';
+import { Eye, Building2, ShieldCheck, AlertCircle, Sun, Moon, Smartphone } from 'lucide-react';
 
 export default function Header({ activeTab, setActiveTab, onOpenLegal, darkMode, onToggleDarkMode }) {
   return (
@@ -54,6 +54,17 @@ export default function Header({ activeTab, setActiveTab, onOpenLegal, darkMode,
               <Building2 className="w-4 h-4" />
               <span>Kurum Rehberi</span>
             </button>
+
+            <a
+              href="https://github.com/rasne-dev/KentGozu/releases/latest"
+              target="_blank"
+              rel="noreferrer"
+              title="Resmi Android Uygulamasını (APK) İndir"
+              className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden sm:inline">APK</span>
+            </a>
 
             <button
               onClick={onOpenLegal}

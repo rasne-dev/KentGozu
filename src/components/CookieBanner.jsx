@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Cookie, Check, ShieldCheck } from 'lucide-react';
 
-export default function CookieBanner({ onOpenLegal }) {
+export default function CookieBanner({ onOpenLegal, suppressed = false }) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    if (suppressed) {
+      setIsVisible(false);
+      return;
+    }
     const consent = localStorage.getItem('kentgozu-cookie-consent');
     if (!consent) {
       // İlk ziyarette küçük bir gecikmeyle göster
       const timer = setTimeout(() => setIsVisible(true), 600);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [suppressed]);
 
   const handleAccept = () => {
     localStorage.setItem('kentgozu-cookie-consent', 'accepted');

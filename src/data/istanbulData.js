@@ -6,10 +6,10 @@ export const KGM_INFO = {
   name: 'Karayolları Genel Müdürlüğü (1. Bölge Müdürlüğü - İstanbul)',
   shortName: 'KGM (Karayolları 1. Bölge)',
   email: 'bol01@kgm.gov.tr',
-  secondaryEmail: 'bilgiedinme@kgm.gov.tr',
+  secondaryEmail: 'info@kgm.gov.tr',
   phone: 'ALO 159 / 0212 312 90 00',
   website: 'https://www.kgm.gov.tr',
-  description: 'Otoyollar (TEM, Kuzey Marmara), E-5 (D-100 Karayolu), Çevre Yolları, Boğaz Köprüleri ve devlet yolları sorumluluğundadır.',
+  description: 'Otoyollar (TEM, Kuzey Marmara Otoyolu), E-5 (D-100 Karayolu), Çevre Yolları, Boğaz Köprüleri (15 Temmuz, FSM, Yavuz Sultan Selim) ve bağlantılı devlet yollarının asfalt, çukur, levha ve yol bakımından doğrudan Karayolları 1. Bölge Müdürlüğü saha ekipleri sorumludur.',
   badge: 'Otoyol & Devlet Yolları'
 };
 
@@ -23,7 +23,7 @@ export const IBB_INFO = {
   phone: 'ALO 153',
   whatsapp: '+905521530034',
   website: 'https://www.ibb.istanbul',
-  description: 'Genişliği 14 metre üzeri ana arterler, bulvarlar, metrobüs ve tramvay güzergahları, ana caddeler ve meydanlar İBB yetkisindedir.',
+  description: 'Genişliği 14 metre üzeri ana arterler, bulvarlar, metrobüs ve tramvay güzergahları, ana caddeler, meydanlar, sahil yolları, köprülü kavşaklar ve trafik sinyalizasyonu İBB Çözüm Merkezi (Beyaz Masa) yetki ve sorumluluk alanındadır.',
   badge: 'Ana Arter & Bulvarlar'
 };
 
@@ -35,7 +35,7 @@ export const ISKI_INFO = {
   email: 'iski@iski.gov.tr',
   phone: 'ALO 185',
   website: 'https://www.iski.istanbul',
-  description: 'Kanalizasyon, yağmur suyu mazgalları, rögar kapakları, su patlakları ve altyapı kazı alanları yetkisindedir.',
+  description: 'Ana kanalizasyon hatları, yağmur suyu mazgalları, atık su ızgaraları, rögar kapakları, temiz su patlakları, su baskınları ve altyapı kazı alanlarının kontrolü İSKİ yetkisindedir.',
   badge: 'Mazgal & Altyapı'
 };
 
