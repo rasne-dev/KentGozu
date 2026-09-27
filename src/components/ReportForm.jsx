@@ -14,6 +14,7 @@ import PhotoUploader from './PhotoUploader';
 import AuthoritySelector from './AuthoritySelector';
 import MailPreviewModal from './MailPreviewModal';
 import { determineResponsibleAuthorities } from '../data/istanbulData';
+import { saveReportToCommunity } from '../data/sampleReports';
 
 export default function ReportForm({ preselectedDistrict }) {
   // Form durumları
@@ -90,6 +91,23 @@ export default function ReportForm({ preselectedDistrict }) {
     if (!isDisclaimerAccepted) {
       alert('Lütfen devam etmeden önce yasal sorumluluk onay kutusunu işaretleyiniz.');
       return;
+    }
+
+    // Kullanıcının bildirdiği noktayı haritaya da ekle
+    if (locationData.latitude && locationData.longitude) {
+      saveReportToCommunity({
+        id: 'user-' + Date.now(),
+        issueTypeId: selectedIssue.id,
+        issueTitle: selectedIssue.title,
+        district: locationData.districtName || 'İstanbul',
+        address: locationData.fullAddress || `${locationData.districtName || 'İstanbul'} (Konum Belirtildi)`,
+        lat: parseFloat(locationData.latitude),
+        lng: parseFloat(locationData.longitude),
+        reportedAt: 'Az önce',
+        authority: authorities[0]?.shortName || authorities[0]?.name || 'İlgili Belediye',
+        supportCount: 1,
+        status: 'İletildi'
+      });
     }
 
     setIsModalOpen(true);
