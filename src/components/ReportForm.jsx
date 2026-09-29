@@ -17,32 +17,46 @@ import { determineResponsibleAuthorities } from '../data/istanbulData';
 import { ISSUE_TYPES } from '../data/issueTypes';
 
 export default function ReportForm({ preselectedDistrict }) {
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const isMock = urlParams?.get('mock') === '1';
+  const isPreview = urlParams?.get('preview') === '1';
+
+  const kadikoyDistrict = {
+    id: 'kadikoy',
+    name: 'Kadıköy Belediyesi',
+    district: 'Kadıköy',
+    side: 'Anadolu',
+    email: 'baskanlik@kadikoy.bel.tr',
+    phone: '444 55 22',
+    address: 'Hasanpaşa Mah. Fahrettin Kerim Gökay Cad. No:2 Kadıköy'
+  };
+
   // Form durumları
-  const [selectedIssue, setSelectedIssue] = useState(null);
+  const [selectedIssue, setSelectedIssue] = useState(isMock ? ISSUE_TYPES[0] : null);
   const [locationData, setLocationData] = useState({
-    latitude: '',
-    longitude: '',
-    districtObj: preselectedDistrict || null,
-    districtName: preselectedDistrict ? preselectedDistrict.district : '',
-    neighbourhood: '',
-    road: '',
-    buildingNo: '',
-    landmark: '',
-    fullAddress: '',
-    isDetected: false
+    latitude: isMock ? '40.9632' : '',
+    longitude: isMock ? '29.0768' : '',
+    districtObj: preselectedDistrict || (isMock ? kadikoyDistrict : null),
+    districtName: preselectedDistrict ? preselectedDistrict.district : (isMock ? 'Kadıköy' : ''),
+    neighbourhood: isMock ? 'Suadiye Mah.' : '',
+    road: isMock ? 'Bağdat Caddesi' : '',
+    buildingNo: isMock ? 'No: 412' : '',
+    landmark: isMock ? 'Şaşkınbakkal Işıklar Yakını' : '',
+    fullAddress: isMock ? 'Suadiye Mah. Bağdat Caddesi No: 412, Kadıköy / İstanbul' : '',
+    isDetected: isMock
   });
-  const [roadType, setRoadType] = useState('neighborhood');
+  const [roadType, setRoadType] = useState(isMock ? 'main' : 'neighborhood');
   const [photos, setPhotos] = useState([]);
-  const [userNote, setUserNote] = useState('');
-  const [userName, setUserName] = useState('');
-  const [isDisclaimerAccepted, setIsDisclaimerAccepted] = useState(false);
+  const [userNote, setUserNote] = useState(isMock ? 'Bağdat Caddesi üzerinde sağ şeritte yaklaşık 20 cm derinliğinde, araç ve motosiklet trafiğini tehlikeye atan derin bir çukur oluşmuştur. Acilen asfalt yama yapılması gerekmektedir.' : '');
+  const [userName, setUserName] = useState(isMock ? 'Vatandaş Bildirimi' : '');
+  const [isDisclaimerAccepted, setIsDisclaimerAccepted] = useState(isMock);
 
   // Dinamik yetkililer
   const [authorities, setAuthorities] = useState([]);
   const [selectedEmails, setSelectedEmails] = useState([]);
 
   // Modal durumu
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(isMock && isPreview);
 
   useEffect(() => {
     if (preselectedDistrict) {

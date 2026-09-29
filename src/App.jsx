@@ -5,18 +5,34 @@ import DirectoryView from './components/DirectoryView';
 import LegalNoticeModal from './components/LegalNoticeModal';
 import CookieBanner from './components/CookieBanner';
 import MobileAppPrompt from './components/MobileAppPrompt';
-import { Eye, Scale, Smartphone, ShieldCheck } from 'lucide-react';
+import OnboardingModal from './components/OnboardingModal';
+import { Eye, Scale, Smartphone, ShieldCheck, HelpCircle } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('report');
-  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const initialTab = urlParams?.get('tab') || 'report';
+  const initialLegal = urlParams?.get('legal') === '1';
+  const forceGuide = urlParams?.get('tour') === '1' || urlParams?.get('guide') === '1' || urlParams?.get('rehber') === '1';
+  const isMock = urlParams?.get('mock') === '1';
+
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(initialLegal);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(() => {
+    if (forceGuide) return true;
+    if (isMock) return false;
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('kentgozu-onboarding-seen');
+    }
+    return false;
+  });
   const [preselectedDistrict, setPreselectedDistrict] = useState(null);
   const [showApkPrompt, setShowApkPrompt] = useState(false);
 
   useEffect(() => {
     // Sadece mobil tarayıcıda ve daha önce görmemiş olanlara göster
     // Capacitor native platform içinde çalışıyorsa gösterme
+    // Rehber turu açıksa üst üste açılmasını engelle
     const isNative = Capacitor.isNativePlatform();
     const isMobile = typeof window !== 'undefined' && (
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
@@ -24,11 +40,24 @@ export default function App() {
     );
     const alreadySeen = localStorage.getItem('kentgozu-apk-prompt-seen');
 
-    if (isMobile && !isNative && !alreadySeen) {
+    if (isMobile && !isNative && !alreadySeen && !isOnboardingOpen) {
       const timer = setTimeout(() => setShowApkPrompt(true), 800);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isOnboardingOpen]);
+
+  const handleCloseOnboarding = () => {
+    setIsOnboardingOpen(false);
+    const isNative = Capacitor.isNativePlatform();
+    const isMobile = typeof window !== 'undefined' && (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.innerWidth < 768
+    );
+    const alreadySeen = localStorage.getItem('kentgozu-apk-prompt-seen');
+    if (isMobile && !isNative && !alreadySeen) {
+      setTimeout(() => setShowApkPrompt(true), 600);
+    }
+  };
 
   // Dark mode state
   const [darkMode, setDarkMode] = useState(() => {
@@ -62,6 +91,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenLegal={() => setIsLegalModalOpen(true)}
+        onOpenOnboarding={() => setIsOnboardingOpen(true)}
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
       />
@@ -86,7 +116,14 @@ export default function App() {
             <span>— Açık Kaynak Sivil Katılım & Kentsel Bildirim Platformu</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap justify-center sm:justify-end">
+            <button
+              onClick={() => setIsOnboardingOpen(true)}
+              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Nasıl Çalışır?</span>
+            </button>
             <a
               href="https://github.com/rasne-dev/KentGozu/releases/latest"
               target="_blank"
@@ -133,6 +170,12 @@ export default function App() {
         </div>
       </footer>
 
+      {/* Onboarding / Welcome Guide Tour */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={handleCloseOnboarding}
+      />
+
       {/* Legal & KVKK Modal */}
       <LegalNoticeModal
         isOpen={isLegalModalOpen}
@@ -148,7 +191,7 @@ export default function App() {
       {/* Cookie & Transparency Banner */}
       <CookieBanner 
         onOpenLegal={() => setIsLegalModalOpen(true)} 
-        suppressed={showApkPrompt}
+        suppressed={showApkPrompt || isOnboardingOpen}
       />
     </div>
   );

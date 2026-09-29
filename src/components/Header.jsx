@@ -1,7 +1,7 @@
 import React from 'react';
-import { Eye, Building2, ShieldCheck, AlertCircle, Sun, Moon, Smartphone } from 'lucide-react';
+import { Eye, Building2, ShieldCheck, AlertCircle, Sun, Moon, Smartphone, HelpCircle } from 'lucide-react';
 
-export default function Header({ activeTab, setActiveTab, onOpenLegal, darkMode, onToggleDarkMode }) {
+export default function Header({ activeTab, setActiveTab, onOpenLegal, onOpenOnboarding, darkMode, onToggleDarkMode }) {
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-xs transition-colors duration-200">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3.5">
@@ -53,6 +53,15 @@ export default function Header({ activeTab, setActiveTab, onOpenLegal, darkMode,
             >
               <Building2 className="w-4 h-4" />
               <span>Kurum Rehberi</span>
+            </button>
+
+            <button
+              onClick={onOpenOnboarding}
+              title="Nasıl Çalışır? (Kullanım Rehberi)"
+              className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span className="hidden sm:inline">Nasıl Çalışır?</span>
             </button>
 
             <a
