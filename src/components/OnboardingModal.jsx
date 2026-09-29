@@ -19,32 +19,47 @@ import {
 const ONBOARDING_STEPS = [
   {
     id: 'welcome',
-    badge: 'Sivil Katılım & Kent Gözlemi',
+    badge: 'KentGözü’nün Amacı & Vizyonu',
     badgeColor: 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border-blue-300/60 dark:border-blue-800/60',
-    title: 'Şehrinize Göz Kulak Olun!',
-    subtitle: 'İstanbul’un aksaklıklarını birlikte tespit ediyor, resmi kanallarla çözüme kavuşturuyoruz.',
+    title: 'Neden KentGözü? Temel Amacımız',
+    subtitle: 'Vatandaş ile yetkili kurumlar arasında hızlı, resmi ve pratik bir köprü.',
     icon: Eye,
     gradient: 'from-blue-600 to-indigo-600',
     content: (
       <div className="space-y-3">
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-          <strong>KentGözü</strong>; yollardaki tehlikeli çukurlar, kırık kaldırımlar, aydınlatma arızaları veya su patlakları gibi kentsel sorunları saniyeler içinde tespit edip doğrudan yetkili kamu kurumuna iletmenizi sağlayan bağımsız ve açık kaynaklı bir sivil katılım platformudur.
+        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+          KentGözü'nün temel amacı; vatandaşların sokaklarındaki çukur, bozuk asfalt, kırık kaldırım veya aydınlatma sorunlarını bildirmek için <strong>tek tek belediye veya kamu kurumu iletişim bilgilerini aramakla uğraşmasını önlemektir</strong>.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-          <div className="p-3 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-            <div className="text-xs">
-              <span className="font-semibold text-slate-900 dark:text-white block">Sahipsiz Sorun Yok</span>
-              <span className="text-slate-500 dark:text-slate-400">Şehrinizdeki hasarları sahipsiz bırakmayın, çözüme katkı verin.</span>
+
+        <div className="grid grid-cols-1 gap-2 pt-0.5">
+          <div className="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Mail className="w-4 h-4" />
+            </div>
+            <div className="text-xs space-y-0.5">
+              <span className="font-bold text-slate-900 dark:text-white block">Hazır Resmi E-Posta Taslağı</span>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                Karmaşık dilekçe formatlarıyla uğraşmadan; konum, fotoğraf ve mevzuat maddelerini içeren resmi başvuru tek tıkla hazırlanır.
+              </p>
             </div>
           </div>
-          <div className="p-3 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 flex items-start gap-2.5">
-            <FileCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
-            <div className="text-xs">
-              <span className="font-semibold text-slate-900 dark:text-white block">Resmi Dilekçe Hakkı</span>
-              <span className="text-slate-500 dark:text-slate-400">Başvurularınız 3071 sayılı kanun kapsamında resmiyet kazanır.</span>
+
+          <div className="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <FileCheck className="w-4 h-4" />
+            </div>
+            <div className="text-xs space-y-0.5">
+              <span className="font-bold text-slate-900 dark:text-white block">Resmi Kayıt Altına Alma & Hızlı Çözüm</span>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                Bildirilen sorunlar kurumsal e-posta ile doğrudan resmi kayda girer; böylece aksaklıkların sahipsiz kalması önlenir ve bir an önce çözülmesi sağlanır.
+              </p>
             </div>
           </div>
+        </div>
+
+        <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+          <span>39 İlçe Belediyesi, İBB, İSKİ, Karayolları ve BEDAŞ/AYEDAŞ güncel kurumsal kanalları sisteme entegredir.</span>
         </div>
       </div>
     )
