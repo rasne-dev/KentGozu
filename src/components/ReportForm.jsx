@@ -6,7 +6,12 @@ import {
   MessageSquare, 
   CheckCircle, 
   AlertCircle,
-  ShieldAlert
+  ShieldAlert,
+  Check,
+  MapPin,
+  Camera,
+  Building2,
+  Scale
 } from 'lucide-react';
 import IssueSelector from './IssueSelector';
 import LocationPicker from './LocationPicker';
@@ -15,6 +20,7 @@ import AuthoritySelector from './AuthoritySelector';
 import MailPreviewModal from './MailPreviewModal';
 import { determineResponsibleAuthorities } from '../data/istanbulData';
 import { ISSUE_TYPES } from '../data/issueTypes';
+import { scrollToElement } from '../utils/helpers';
 
 export default function ReportForm({ preselectedDistrict }) {
   const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -45,7 +51,7 @@ export default function ReportForm({ preselectedDistrict }) {
     fullAddress: isMock ? 'Suadiye Mah. Bağdat Caddesi No: 412, Kadıköy / İstanbul' : '',
     isDetected: isMock
   });
-  const [roadType, setRoadType] = useState(isMock ? 'main' : 'neighborhood');
+  const [roadType, setRoadType] = useState(isMock ? 'main_artery' : 'neighborhood');
   const [photos, setPhotos] = useState([]);
   const [userNote, setUserNote] = useState(isMock ? 'Bağdat Caddesi üzerinde sağ şeritte yaklaşık 20 cm derinliğinde, araç ve motosiklet trafiğini tehlikeye atan derin bir çukur oluşmuştur. Acilen asfalt yama yapılması gerekmektedir.' : '');
   const [userName, setUserName] = useState(isMock ? 'Vatandaş Bildirimi' : '');
@@ -54,6 +60,9 @@ export default function ReportForm({ preselectedDistrict }) {
   // Dinamik yetkililer
   const [authorities, setAuthorities] = useState([]);
   const [selectedEmails, setSelectedEmails] = useState([]);
+
+  // Validasyon hata mesajı
+  const [validationError, setValidationError] = useState(null);
 
   // Modal durumu
   const [isModalOpen, setIsModalOpen] = useState(isMock && isPreview);
@@ -81,6 +90,7 @@ export default function ReportForm({ preselectedDistrict }) {
 
   const handleSelectIssue = (issue) => {
     setSelectedIssue(issue);
+    setValidationError(null);
     if (issue) {
       const sample = (issue.placeholder || '').replace(/^Örn:\s*/, '');
       const sampleTexts = ISSUE_TYPES.map((i) => (i.placeholder || '').replace(/^Örn:\s*/, ''));
@@ -104,25 +114,42 @@ export default function ReportForm({ preselectedDistrict }) {
 
   const handleOpenPreview = (e) => {
     e.preventDefault();
+    setValidationError(null);
+
     if (!selectedIssue) {
-      alert('Lütfen bildirmek istediğiniz sorun türünü seçiniz.');
+      setValidationError('Lütfen bildirmek istediğiniz sorun türünü seçiniz (Adım 1).');
+      scrollToElement('step-issue-selector');
       return;
     }
+
     if (!locationData.districtObj && roadType !== 'highway') {
-      alert('Lütfen ilgili ilçeyi seçiniz veya GPS ile konumunuzu belirleyiniz.');
+      setValidationError('Lütfen sorunun bulunduğu ilçeyi seçiniz veya GPS ile konumunuzu belirleyiniz (Adım 2).');
+      scrollToElement('step-location-picker');
       return;
     }
+
     if (selectedEmails.length === 0) {
-      alert('Lütfen en az bir yetkili kurum e-posta adresi seçiniz.');
+      setValidationError('Lütfen en az bir yetkili kurum e-posta adresi seçiniz (Adım 5).');
+      scrollToElement('step-authority-selector');
       return;
     }
+
     if (!isDisclaimerAccepted) {
-      alert('Lütfen devam etmeden önce yasal sorumluluk onay kutusunu işaretleyiniz.');
+      setValidationError('Devam etmeden önce lütfen yasal sorumluluk onay kutusunu işaretleyiniz (Adım 6).');
+      scrollToElement('step-disclaimer');
       return;
     }
 
     setIsModalOpen(true);
   };
+
+  // İlerleme adımları hesaplama
+  const isStep1Done = Boolean(selectedIssue);
+  const isStep2Done = Boolean(locationData.districtObj || roadType === 'highway');
+  const isStep3Done = photos.length > 0;
+  const isStep4Done = userNote.trim().length > 0;
+  const isStep5Done = selectedEmails.length > 0;
+  const isStep6Done = isDisclaimerAccepted;
 
   return (
     <div className="space-y-6">
@@ -137,25 +164,129 @@ export default function ReportForm({ preselectedDistrict }) {
             Kentsel Aksaklığı Bildirin, Yetkili Kuruma İletelim
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Yoldaki bir çukur, kırık mazgal veya devrilmiş tabela ile mi karşılaştınız?
-            Sorunu seçin; uygulama konuma göre <strong>Karayolları, İBB veya İlçe Belediyesi</strong>'ni eşleştirip resmi başvuru taslağınızı hazırlasın.
+            Yoldaki bir çukur, kırık mazgal, yanmayan sokak lambası veya kaldırım çökmesi ile mi karşılaştınız?
+            Sorunu ve konumu seçin; KentGözü yetkili kurumu (39 İlçe Belediyesi, İBB, İSKİ, BEDAŞ/AYEDAŞ veya KGM) eşleştirip mevzuata uygun resmi başvuru taslağınızı hazırlasın.
           </p>
         </div>
       </div>
+
+      {/* Adım İlerleme Çubuğu (Stepper) */}
+      <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-x-auto scrollbar-none">
+        <div className="flex items-center justify-between min-w-[500px] text-xs">
+          <button 
+            type="button" 
+            onClick={() => scrollToElement('step-issue-selector')}
+            className="flex items-center gap-1.5 cursor-pointer group"
+          >
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              isStep1Done ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'
+            }`}>
+              {isStep1Done ? '✓' : '1'}
+            </span>
+            <span className={`font-semibold ${isStep1Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'}`}>
+              Sorun Türü
+            </span>
+          </button>
+
+          <span className="text-slate-300 dark:text-slate-700">──</span>
+
+          <button 
+            type="button" 
+            onClick={() => scrollToElement('step-location-picker')}
+            className="flex items-center gap-1.5 cursor-pointer group"
+          >
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              isStep2Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
+              {isStep2Done ? '✓' : '2'}
+            </span>
+            <span className={`font-semibold ${isStep2Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+              Konum
+            </span>
+          </button>
+
+          <span className="text-slate-300 dark:text-slate-700">──</span>
+
+          <button 
+            type="button" 
+            onClick={() => scrollToElement('step-photo-uploader')}
+            className="flex items-center gap-1.5 cursor-pointer group"
+          >
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              isStep3Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
+              {isStep3Done ? '✓' : '3'}
+            </span>
+            <span className={`font-semibold ${isStep3Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+              Fotoğraf {photos.length > 0 && `(${photos.length})`}
+            </span>
+          </button>
+
+          <span className="text-slate-300 dark:text-slate-700">──</span>
+
+          <button 
+            type="button" 
+            onClick={() => scrollToElement('step-description')}
+            className="flex items-center gap-1.5 cursor-pointer group"
+          >
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              isStep4Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
+              {isStep4Done ? '✓' : '4'}
+            </span>
+            <span className={`font-semibold ${isStep4Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+              Açıklama
+            </span>
+          </button>
+
+          <span className="text-slate-300 dark:text-slate-700">──</span>
+
+          <button 
+            type="button" 
+            onClick={() => scrollToElement('step-authority-selector')}
+            className="flex items-center gap-1.5 cursor-pointer group"
+          >
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              isStep5Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
+              {isStep5Done ? '✓' : '5'}
+            </span>
+            <span className={`font-semibold ${isStep5Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+              Yetkili Kurum
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Validasyon Hata Bildirimi (Inline Alert) */}
+      {validationError && (
+        <div className="p-4 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 rounded-2xl flex items-start gap-3 animate-in fade-in duration-200">
+          <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <h4 className="text-xs font-bold text-red-900 dark:text-red-200">Eksik Bilgi Bulunuyor</h4>
+            <p className="text-xs text-red-700 dark:text-red-300">{validationError}</p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleOpenPreview} className="space-y-5">
         {/* Adım 1: Sorun Türü */}
         <IssueSelector
           selectedIssue={selectedIssue}
           onSelectIssue={handleSelectIssue}
+          isInvalid={validationError && !selectedIssue}
         />
 
         {/* Adım 2: Konum ve Yol Sorumluluk Tipi */}
         <LocationPicker
           locationData={locationData}
-          setLocationData={setLocationData}
+          setLocationData={(data) => {
+            setLocationData(data);
+            setValidationError(null);
+          }}
           roadType={roadType}
           setRoadType={setRoadType}
+          isInvalid={validationError && !locationData.districtObj && roadType !== 'highway'}
         />
 
         {/* Adım 3: Fotoğraf */}
@@ -165,16 +296,24 @@ export default function ReportForm({ preselectedDistrict }) {
         />
 
         {/* Adım 4: Açıklama ve Vatandaş Bilgisi */}
-        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 transition-colors">
+        <div 
+          id="step-description"
+          className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 transition-colors"
+        >
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Sorun Açıklaması & Notunuz</span>
-              </label>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                  4
+                </span>
+                <label className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span>Adım 4: Sorun Açıklaması & Notunuz</span>
+                </label>
+              </div>
 
               {selectedIssue && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-start sm:self-auto">
                   <button
                     type="button"
                     onClick={() => {
@@ -212,12 +351,15 @@ export default function ReportForm({ preselectedDistrict }) {
               className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none"
             />
 
-            {selectedIssue && userNote && (
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-blue-500 shrink-0" />
-                <span>Kategoriye özel örnek açıklama hazırlandı; dilediğiniz gibi düzenleyebilir veya detay ekleyebilirsiniz.</span>
-              </p>
-            )}
+            <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+              <span>{userNote.length} karakter</span>
+              {selectedIssue && userNote && (
+                <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                  <Sparkles className="w-3 h-3 shrink-0" />
+                  <span>Örnek açıklama eklendi; dilediğiniz gibi düzenleyebilirsiniz.</span>
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -236,61 +378,69 @@ export default function ReportForm({ preselectedDistrict }) {
                 />
               </div>
               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-                Dilekçe altında imza yerine eklenir. Boş bırakabilirsiniz.
+                Resmi dilekçe formatında imza yerine eklenir. Boş bırakabilirsiniz.
               </p>
             </div>
           </div>
         </div>
 
         {/* Adım 5: Yetkili Kurumlar ve İletişim */}
-        <div id="authority-selector-section">
-          <AuthoritySelector
-            authorities={authorities}
-            selectedEmails={selectedEmails}
-            toggleEmailSelection={toggleEmailSelection}
-          />
-        </div>
+        <AuthoritySelector
+          authorities={authorities}
+          selectedEmails={selectedEmails}
+          toggleEmailSelection={toggleEmailSelection}
+        />
 
         {/* Adım 6: Yasal Sorumluluk & Doğruluk Onay Kutusu */}
-        <div className="bg-amber-50/90 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200/90 dark:border-amber-900/60 transition-colors">
+        <div 
+          id="step-disclaimer"
+          className={`p-4 rounded-2xl border transition-all ${
+            validationError && !isDisclaimerAccepted
+              ? 'bg-red-50/80 dark:bg-red-950/40 border-red-500 ring-2 ring-red-500/20'
+              : 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-200/90 dark:border-amber-900/60'
+          }`}
+        >
           <label className="flex items-start gap-3 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={isDisclaimerAccepted}
-              onChange={(e) => setIsDisclaimerAccepted(e.target.checked)}
+              onChange={(e) => {
+                setIsDisclaimerAccepted(e.target.checked);
+                setValidationError(null);
+              }}
               className="mt-0.5 w-4 h-4 text-blue-600 rounded border-amber-300 dark:border-amber-700 focus:ring-blue-500 cursor-pointer shrink-0"
             />
             <div className="space-y-1">
-              <span className="text-xs font-semibold text-amber-950 dark:text-amber-200 block">
-                Yasal Sorumluluk ve Doğruluk Beyanı:
+              <span className="text-xs font-bold text-amber-950 dark:text-amber-200 block flex items-center gap-1.5">
+                <Scale className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
+                <span>Adım 6: Yasal Sorumluluk ve Doğruluk Beyanı:</span>
               </span>
               <p className="text-xs text-amber-900/90 dark:text-amber-300/90 leading-relaxed">
-                Gönderilen iletilerdeki ifadelerin doğruluğu ve hukuki sorumluluğu tarafıma aittir. Kasıtlı asılsız ihbar veya hakaret niteliğindeki bildirimlerin yasal yaptırıma tabi olabileceğini kabul ve beyan ederim.
+                Gönderilen iletilerdeki ifadelerin ve fotoğrafların doğruluğu tarafıma aittir. Kasıtlı asılsız ihbar veya hakaret niteliğindeki bildirimlerin yasal yaptırıma tabi olabileceğini kabul ve beyan ederim.
               </p>
             </div>
           </label>
         </div>
 
-        {/* Aksiyon Butonu */}
+        {/* Aksiyon Butonu (Sticky Bottom Action Bar) */}
         <div className="sticky bottom-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 rounded-2xl border border-blue-200 dark:border-blue-900/60 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 transition-colors">
           <div className="text-xs text-slate-600 dark:text-slate-400 text-center sm:text-left">
-            <span className="font-semibold text-slate-900 dark:text-slate-100 block">
-              Hazırlanan Taslak: {selectedEmails.length} Yetkili Kuruma Yönlendirilecek
+            <span className="font-bold text-slate-900 dark:text-slate-100 block">
+              Hazırlanan Taslak: {selectedEmails.length} Yetkili Kuruma Gönderilecek
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
               {isDisclaimerAccepted
                 ? 'E-posta istemciniz açılacak; kontrol edip tek tıkla göndereceksiniz.'
-                : 'Devam etmek için lütfen yukarıdaki onay kutusunu işaretleyiniz.'}
+                : 'Devam etmek için lütfen Adım 6 onay kutusunu işaretleyiniz.'}
             </span>
           </div>
 
           <button
             type="submit"
-            disabled={!isDisclaimerAccepted}
             className={`w-full sm:w-auto px-6 py-3.5 text-white text-sm font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
               isDisclaimerAccepted
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/25 hover:scale-[1.01] active:scale-[0.99]'
-                : 'bg-slate-400 dark:bg-slate-700 cursor-not-allowed opacity-60 shadow-none'
+                : 'bg-slate-500 hover:bg-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600 shadow-none'
             }`}
           >
             <Send className="w-4 h-4" />

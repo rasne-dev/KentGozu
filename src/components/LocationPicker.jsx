@@ -8,11 +8,11 @@ import {
   Car, 
   Building2, 
   Home, 
-  HelpCircle,
-  CheckCircle2,
-  Edit3,
-  ChevronDown,
-  ChevronUp
+  HelpCircle, 
+  CheckCircle2, 
+  Edit3, 
+  RotateCcw,
+  Sparkles
 } from 'lucide-react';
 import { ISTANBUL_DISTRICTS, ROAD_TYPES, findDistrictByName } from '../data/istanbulData';
 
@@ -20,7 +20,8 @@ export default function LocationPicker({
   locationData,
   setLocationData,
   roadType,
-  setRoadType
+  setRoadType,
+  isInvalid = false
 }) {
   const [loading, setLoading] = useState(false);
   const [geoError, setGeoError] = useState(null);
@@ -31,7 +32,6 @@ export default function LocationPicker({
     setLocationData((prev) => {
       const updated = { ...prev, [field]: value };
       
-      // Parçalardan açık adresi derle
       const parts = [
         updated.road,
         updated.buildingNo ? `No: ${updated.buildingNo}` : '',
@@ -120,7 +120,7 @@ export default function LocationPicker({
         setLoading(false);
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            setGeoError('Konum izni reddedildi. Lütfen tarayıcı ayarlarından konum izni verin veya ilçeyi el ile seçin.');
+            setGeoError('Konum izni reddedildi. Lütfen tarayıcı ayarlarından izin verin veya ilçenizi aşağıdan seçin.');
             break;
           case error.POSITION_UNAVAILABLE:
             setGeoError('Konum bilgisi alınamadı. Lütfen elle seçim yapınız.');
@@ -166,59 +166,100 @@ export default function LocationPicker({
     });
   };
 
+  const handleResetLocation = () => {
+    setLocationData({
+      latitude: '',
+      longitude: '',
+      districtObj: null,
+      districtName: '',
+      neighbourhood: '',
+      road: '',
+      buildingNo: '',
+      landmark: '',
+      fullAddress: '',
+      isDetected: false
+    });
+    setGeoError(null);
+  };
+
   return (
-    <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 transition-colors">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-            <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            2. Konum ve Yol Yetki Alanı
-          </label>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Yetkili kurum (İlçe Belediyesi, İBB veya Karayolları) konumunuza ve yol tipine göre otomatik eşleşir.
-          </p>
+    <div 
+      id="step-location-picker" 
+      className={`bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border transition-all ${
+        isInvalid 
+          ? 'border-red-500 ring-2 ring-red-500/20 shadow-md' 
+          : 'border-slate-200 dark:border-slate-800 shadow-xs'
+      }`}
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
+        <div className="flex items-center gap-2">
+          <span className="w-6 h-6 rounded-lg bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+            2
+          </span>
+          <div>
+            <label className="block text-sm font-bold text-slate-900 dark:text-slate-100">
+              Adım 2: Konum ve Yol Yetki Alanı
+            </label>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Doğru yetkili kurum (İlçe Belediyesi, İBB veya Karayolları) konum ve yol tipine göre belirlenir.
+            </p>
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={detectLocation}
-          disabled={loading}
-          className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-xl border border-blue-200 dark:border-blue-800/80 transition-colors disabled:opacity-50 cursor-pointer self-start sm:self-auto"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              <span>Konum Alınıyor...</span>
-            </>
-          ) : (
-            <>
-              <Navigation className="w-3.5 h-3.5" />
-              <span>📍 Konumumu Otomatik Bul</span>
-            </>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={detectLocation}
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-xl border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Konum Alınıyor...</span>
+              </>
+            ) : (
+              <>
+                <Navigation className="w-3.5 h-3.5" />
+                <span>📍 Konumumu Bul</span>
+              </>
+            )}
+          </button>
+
+          {(locationData.latitude || locationData.fullAddress || locationData.districtName) && (
+            <button
+              type="button"
+              onClick={handleResetLocation}
+              title="Konum bilgilerini sıfırla"
+              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer text-xs flex items-center gap-1"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline text-[11px]">Sıfırla</span>
+            </button>
           )}
-        </button>
+        </div>
       </div>
 
       {geoError && (
-        <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs text-amber-800 dark:text-amber-200">
+        <div className="flex items-start gap-2 p-3 mb-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs text-amber-800 dark:text-amber-200">
           <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <span>{geoError}</span>
         </div>
       )}
 
       {locationData.latitude && locationData.longitude && (
-        <div className="flex items-center justify-between p-2.5 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/60 rounded-xl text-xs text-emerald-900 dark:text-emerald-200">
+        <div className="flex items-center justify-between p-2.5 mb-3 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl text-xs text-emerald-900 dark:text-emerald-200 animate-in fade-in duration-200">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>
-              <strong>GPS Koordinatı:</strong> {locationData.latitude}, {locationData.longitude}
+              <strong>GPS Koordinatı Alındı:</strong> {locationData.latitude}, {locationData.longitude}
             </span>
           </div>
           <a
             href={`https://www.google.com/maps?q=${locationData.latitude},${locationData.longitude}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 hover:underline font-medium"
+            className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 hover:underline font-semibold"
           >
             <span>Haritada Gör</span>
             <ExternalLink className="w-3 h-3" />
@@ -227,16 +268,20 @@ export default function LocationPicker({
       )}
 
       {/* Ana Adres ve İlçe Satırı */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         {/* İlçe Seçimi */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            İlçe (İstanbul):
+            İlçe (İstanbul): <span className="text-red-500">*</span>
           </label>
           <select
             value={locationData.districtObj?.id || ''}
             onChange={handleDistrictChange}
-            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-100"
+            className={`w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-100 ${
+              isInvalid && !locationData.districtObj 
+                ? 'border-red-500 ring-1 ring-red-500' 
+                : 'border-slate-200 dark:border-slate-700 focus:border-blue-500'
+            }`}
           >
             <option value="">-- İlçe Seçiniz --</option>
             <optgroup label="Avrupa Yakası">
@@ -268,7 +313,7 @@ export default function LocationPicker({
               className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
             >
               <Edit3 className="w-3 h-3" />
-              <span>{isManualDetailsOpen ? 'Detayları Gizle' : 'Konumu Düzelt'}</span>
+              <span>{isManualDetailsOpen ? 'Detayları Kapat' : 'Adresi Detaylandır'}</span>
             </button>
           </div>
           <input
@@ -278,18 +323,18 @@ export default function LocationPicker({
             onChange={(e) =>
               setLocationData((prev) => ({ ...prev, fullAddress: e.target.value }))
             }
-            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
         </div>
       </div>
 
       {/* Konumu Düzelt / Detaylandırma Paneli */}
       {isManualDetailsOpen && (
-        <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 rounded-xl space-y-3 animate-in fade-in duration-150">
+        <div className="p-3.5 mb-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 rounded-xl space-y-3 animate-in fade-in duration-150">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-blue-950 dark:text-blue-200 flex items-center gap-1">
               <Edit3 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              Konum ve Adres Bilgilerini Detaylandırın
+              Mahalle, Sokak ve Kapı No Detayları
             </span>
             <span className="text-[11px] text-blue-600 dark:text-blue-400">
               Belediye ekiplerinin noktayı tam bulması için
@@ -367,7 +412,7 @@ export default function LocationPicker({
                 onClick={() => setRoadType(type.id)}
                 className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/60 ring-1 ring-blue-500/30'
+                    ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/60 ring-2 ring-blue-500/25 shadow-xs'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/50 hover:bg-slate-100/70 dark:hover:bg-slate-800'
                 }`}
               >
