@@ -243,11 +243,13 @@ export default function ReportForm({ preselectedDistrict }) {
         </div>
 
         {/* Adım 5: Yetkili Kurumlar ve İletişim */}
-        <AuthoritySelector
-          authorities={authorities}
-          selectedEmails={selectedEmails}
-          toggleEmailSelection={toggleEmailSelection}
-        />
+        <div id="authority-selector-section">
+          <AuthoritySelector
+            authorities={authorities}
+            selectedEmails={selectedEmails}
+            toggleEmailSelection={toggleEmailSelection}
+          />
+        </div>
 
         {/* Adım 6: Yasal Sorumluluk & Doğruluk Onay Kutusu */}
         <div className="bg-amber-50/90 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200/90 dark:border-amber-900/60 transition-colors">

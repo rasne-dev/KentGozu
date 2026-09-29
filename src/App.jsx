@@ -15,12 +15,13 @@ export default function App() {
   const initialLegal = urlParams?.get('legal') === '1';
   const forceGuide = urlParams?.get('tour') === '1' || urlParams?.get('guide') === '1' || urlParams?.get('rehber') === '1';
   const isMock = urlParams?.get('mock') === '1';
+  const isScreenshot = urlParams?.get('screenshot') === '1' || isMock;
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(initialLegal);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(() => {
     if (forceGuide) return true;
-    if (isMock) return false;
+    if (isScreenshot) return false;
     if (typeof window !== 'undefined') {
       return !localStorage.getItem('kentgozu-onboarding-seen');
     }
@@ -31,8 +32,9 @@ export default function App() {
 
   useEffect(() => {
     // Sadece mobil tarayıcıda ve daha önce görmemiş olanlara göster
-    // Capacitor native platform içinde çalışıyorsa gösterme
+    // Capacitor native platform içinde veya ekran görüntüsü modunda gösterme
     // Rehber turu açıksa üst üste açılmasını engelle
+    if (isScreenshot) return;
     const isNative = Capacitor.isNativePlatform();
     const isMobile = typeof window !== 'undefined' && (
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
@@ -44,7 +46,7 @@ export default function App() {
       const timer = setTimeout(() => setShowApkPrompt(true), 800);
       return () => clearTimeout(timer);
     }
-  }, [isOnboardingOpen]);
+  }, [isOnboardingOpen, isScreenshot]);
 
   const handleCloseOnboarding = () => {
     setIsOnboardingOpen(false);
@@ -94,6 +96,7 @@ export default function App() {
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
+        hideApk={Capacitor.isNativePlatform() || isScreenshot}
       />
 
       {/* Main Container */}
@@ -191,7 +194,7 @@ export default function App() {
       {/* Cookie & Transparency Banner */}
       <CookieBanner 
         onOpenLegal={() => setIsLegalModalOpen(true)} 
-        suppressed={showApkPrompt || isOnboardingOpen}
+        suppressed={showApkPrompt || isOnboardingOpen || isScreenshot}
       />
     </div>
   );

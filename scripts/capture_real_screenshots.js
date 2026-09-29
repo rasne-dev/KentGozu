@@ -48,19 +48,23 @@ server.listen(PORT, async () => {
   const screens = [
     {
       name: 'screenshot_01_sorun_bildirimi.png',
-      url: `http://localhost:${PORT}/`
+      url: `http://localhost:${PORT}/?screenshot=1`
     },
     {
       name: 'screenshot_02_kurum_eslesmesi.png',
-      url: `http://localhost:${PORT}/?mock=1`
+      url: `http://localhost:${PORT}/?screenshot=1&mock=1`
     },
     {
       name: 'screenshot_03_kurum_rehberi.png',
-      url: `http://localhost:${PORT}/?tab=directory`
+      url: `http://localhost:${PORT}/?screenshot=1&tab=directory`
     },
     {
       name: 'screenshot_04_dilekce_onizleme.png',
-      url: `http://localhost:${PORT}/?mock=1&preview=1`
+      url: `http://localhost:${PORT}/?screenshot=1&mock=1&preview=1`
+    },
+    {
+      name: 'screenshot_05_rehber_ve_amac.png',
+      url: `http://localhost:${PORT}/?screenshot=1&tour=1`
     }
   ];
 
@@ -76,7 +80,7 @@ server.listen(PORT, async () => {
       '--window-size=412,915',
       '--force-device-scale-factor=2.625',
       '--hide-scrollbars',
-      '--virtual-time-budget=2500',
+      '--virtual-time-budget=3000',
       `--screenshot=${outFile}`,
       screen.url
     ];
@@ -89,7 +93,7 @@ server.listen(PORT, async () => {
     }
   }
 
-  console.log('All real app screenshots captured successfully!');
+  console.log('All real in-app screenshots captured successfully!');
   server.close(() => {
     process.exit(0);
   });

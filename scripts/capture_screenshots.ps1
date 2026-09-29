@@ -5,10 +5,11 @@ $edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 $outDir = "C:\Users\Ensar\Desktop\PROJELER\KentGozu\playstore-assets"
 
 $targets = @(
-    @{ name = "screenshot_01_sorun_bildirimi.png"; url = "http://localhost:8089/" },
-    @{ name = "screenshot_02_kurum_eslesmesi.png"; url = "http://localhost:8089/?mock=1" },
-    @{ name = "screenshot_03_kurum_rehberi.png"; url = "http://localhost:8089/?tab=directory" },
-    @{ name = "screenshot_04_dilekce_onizleme.png"; url = "http://localhost:8089/?mock=1&preview=1" }
+    @{ name = "screenshot_01_sorun_bildirimi.png"; url = "http://localhost:8089/?screenshot=1" },
+    @{ name = "screenshot_02_kurum_eslesmesi.png"; url = "http://localhost:8089/?screenshot=1&mock=1" },
+    @{ name = "screenshot_03_kurum_rehberi.png"; url = "http://localhost:8089/?screenshot=1&tab=directory" },
+    @{ name = "screenshot_04_dilekce_onizleme.png"; url = "http://localhost:8089/?screenshot=1&mock=1&preview=1" },
+    @{ name = "screenshot_05_kullanim_rehberi.png"; url = "http://localhost:8089/?screenshot=1&tour=1" }
 )
 
 foreach ($t in $targets) {
@@ -20,4 +21,4 @@ foreach ($t in $targets) {
 }
 
 Stop-Process -Id $server.Id -Force
-Write-Host "All screenshots captured successfully!"
+Write-Host "All real app screenshots captured successfully!"
