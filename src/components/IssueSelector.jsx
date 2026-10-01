@@ -51,11 +51,14 @@ const CATEGORY_TABS = [
   { id: 'altyapi', label: '🏗️ Altyapı & Yaya', tags: ['Yaya Güvenliği', 'Acil Tehlike', 'Altyapı & AYKOME'] },
   { id: 'enerji', label: '⚡ Aydınlatma & Enerji', tags: ['Güvenlik', 'Hayati Tehlike'] },
   { id: 'cevre', label: '🌳 Çevre & Park', tags: ['Çevre', 'Park ve Bahçeler', 'Çevre Sağlığı'] },
-  { id: 'canli', label: '🐾 Sokak Canları & Zabıta', tags: ['Acil Veterinerlik', 'Rehabilitasyon', 'Zabıta & Denetim', 'İmar & Güvenlik'] }
+  { id: 'canli', label: '🐾 Sokak Canları', tags: ['Acil Veterinerlik', 'Rehabilitasyon'] },
+  { id: 'zabita', label: '🏛️ Zabıta & İmar', tags: ['Zabıta & Denetim', 'İmar & Güvenlik'] },
+  { id: 'diger', label: '📋 Diğer & Genel', tags: ['Genel'] }
 ];
 
 export default function IssueSelector({ selectedIssue, onSelectIssue, isInvalid = false }) {
-  const [showAll, setShowAll] = useState(false);
+  const isSelectedInHiddenPart = selectedIssue && ISSUE_TYPES.findIndex(i => i.id === selectedIssue.id) >= 8;
+  const [showAll, setShowAll] = useState(() => isSelectedInHiddenPart);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoryTab, setSelectedCategoryTab] = useState('ALL');
 
@@ -85,12 +88,25 @@ export default function IssueSelector({ selectedIssue, onSelectIssue, isInvalid 
     });
   }, [searchTerm, selectedCategoryTab]);
 
-  // Arama veya kategori seçiliyken tamamını göster, aksi halde ilk 8 veya genişletilmiş hali göster
+  // Arama veya kategori seçiliyken tamamını göster, aksi halde kullanıcı tercihine göre göster
   const isSearchingOrFiltering = searchTerm.trim().length > 0 || selectedCategoryTab !== 'ALL';
-  const isSelectedInHiddenPart = selectedIssue && ISSUE_TYPES.findIndex(i => i.id === selectedIssue.id) >= 8;
-  const isExpanded = showAll || isSelectedInHiddenPart || isSearchingOrFiltering;
+  const isExpanded = isSearchingOrFiltering || showAll;
 
-  const displayedIssues = isExpanded ? filteredIssues : filteredIssues.slice(0, 8);
+  // Daraltılmış modda seçili öğe ilk 8 içinde değilse, ilk 7 + seçili öğeyi göstererek görünür kıl
+  const displayedIssues = useMemo(() => {
+    if (isExpanded) return filteredIssues;
+    if (filteredIssues.length <= 8) return filteredIssues;
+    
+    const firstEight = filteredIssues.slice(0, 8);
+    const selectedInFiltered = filteredIssues.find(i => i.id === selectedIssue?.id);
+    const isSelectedInFirstEight = firstEight.some(i => i.id === selectedIssue?.id);
+
+    if (selectedInFiltered && !isSelectedInFirstEight) {
+      return [...filteredIssues.slice(0, 7), selectedInFiltered];
+    }
+
+    return firstEight;
+  }, [filteredIssues, isExpanded, selectedIssue]);
 
   return (
     <div 

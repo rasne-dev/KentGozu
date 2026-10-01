@@ -1,3 +1,5 @@
+import { normalizeTurkish } from '../utils/helpers';
+
 // İstanbul ve Türkiye Yetkili Kamu Kurumları & İlçe Belediyeleri Veritabanı
 
 // 1. Karayolları Genel Müdürlüğü (KGM) 1. Bölge (İstanbul ve Çevresi)
@@ -548,6 +550,29 @@ export function determineResponsibleAuthorities({
   }
 
   // 2. Özel Sorun Türü İhtisas Kurumları
+  const specializedIssues = [
+    'rogar_mazgal',
+    'aydinlatma_direk',
+    'elektrik_kablo_pano',
+    'trafik_isik',
+    'yarali_hayvan',
+    'basibos_hayvan',
+    'hasere_ilaclama',
+    'altyapi_kazi',
+    'metruk_bina',
+    'gida_ruhsat'
+  ];
+
+  if (specializedIssues.includes(issueTypeId)) {
+    // Özel ihtisas kurumu devreye girdiğinde genel yol kurumlarını ikincil (koordinasyon) yap
+    selectedAuthorities.forEach((a) => {
+      a.isPrimary = false;
+      if (a.role && a.role.includes('Birincil Yetkili')) {
+        a.role = a.role.replace('Birincil Yetkili', 'Koordinasyon & Saha Desteği');
+      }
+    });
+  }
+
   if (issueTypeId === 'rogar_mazgal') {
     // Mazgal ve rögar için İSKİ doğrudan yetkilidir
     selectedAuthorities.unshift({
@@ -648,25 +673,17 @@ export function determineResponsibleAuthorities({
 
 export function findDistrictByName(districtName) {
   if (!districtName) return null;
-  const clean = districtName.trim().toLowerCase()
-    .replace(/i̇/g, 'i')
-    .replace(/ı/g, 'i')
-    .replace(/ç/g, 'c')
-    .replace(/ğ/g, 'g')
-    .replace(/ö/g, 'o')
-    .replace(/ş/g, 's')
-    .replace(/ü/g, 'u')
-    .replace(/\s*(ilcesi|belediyesi|ilce|belediye)\s*/g, '');
+  const clean = normalizeTurkish(districtName)
+    .replace(/\s*(ilcesi|belediyesi|ilce|belediye)\s*/g, '')
+    .trim();
 
-  return ISTANBUL_DISTRICTS.find(d => {
-    const dClean = d.district.toLowerCase()
-      .replace(/i̇/g, 'i')
-      .replace(/ı/g, 'i')
-      .replace(/ç/g, 'c')
-      .replace(/ğ/g, 'g')
-      .replace(/ö/g, 'o')
-      .replace(/ş/g, 's')
-      .replace(/ü/g, 'u');
-    return clean === dClean || clean.includes(dClean) || dClean.includes(clean);
+  // 1. Önce tam eşleşme ara
+  const exact = ISTANBUL_DISTRICTS.find((d) => normalizeTurkish(d.district) === clean);
+  if (exact) return exact;
+
+  // 2. İlçe adını içeren veya ilçe adının içerdiği eşleşme
+  return ISTANBUL_DISTRICTS.find((d) => {
+    const dClean = normalizeTurkish(d.district);
+    return clean.includes(dClean) || (clean.length >= 4 && dClean.includes(clean));
   }) || null;
 }

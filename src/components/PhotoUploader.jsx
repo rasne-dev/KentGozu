@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Camera, Images, Trash2, X, Plus, ShieldCheck, ZoomIn } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Camera, Images, Trash2, X, Plus, ShieldCheck, ZoomIn, AlertTriangle } from 'lucide-react';
 import { formatFileSize } from '../utils/helpers';
 
 export default function PhotoUploader({ photos = [], setPhotos }) {
@@ -7,28 +7,60 @@ export default function PhotoUploader({ photos = [], setPhotos }) {
   const cameraInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
 
   const MAX_PHOTOS = 5;
 
+  // Escape tuşu ile büyütülmüş fotoğraf önizlemesini kapat
+  useEffect(() => {
+    if (!previewPhoto) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setPreviewPhoto(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [previewPhoto]);
+
+  // Sayfadan çıkışta bellek sızıntısını önlemek için ObjectURL'leri temizle
+  useEffect(() => {
+    return () => {
+      photos.forEach((p) => {
+        if (p?.previewUrl) URL.revokeObjectURL(p.previewUrl);
+      });
+    };
+  }, []);
+
   const processFiles = (fileList) => {
     if (!fileList || fileList.length === 0) return;
+    setUploadError(null);
 
     const remainingSlots = MAX_PHOTOS - photos.length;
     if (remainingSlots <= 0) {
+      setUploadError(`Maksimum ${MAX_PHOTOS} fotoğraf sınırına ulaştınız.`);
       return;
     }
 
-    const filesToProcess = Array.from(fileList).slice(0, remainingSlots);
+    const filesArray = Array.from(fileList);
+    const validImageFiles = filesArray.filter((file) => file.type.startsWith('image/'));
 
-    const newPhotos = filesToProcess
-      .filter((file) => file.type.startsWith('image/'))
-      .map((file) => ({
-        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        file,
-        previewUrl: URL.createObjectURL(file),
-        name: file.name,
-        sizeFormatted: formatFileSize(file.size)
-      }));
+    if (validImageFiles.length === 0) {
+      setUploadError('Lütfen geçerli bir görsel dosyası (JPEG, PNG vb.) seçiniz.');
+      return;
+    }
+
+    if (validImageFiles.length > remainingSlots) {
+      setUploadError(`En fazla ${remainingSlots} fotoğraf daha ekleyebilirsiniz. İlk ${remainingSlots} görsel eklendi.`);
+    }
+
+    const filesToProcess = validImageFiles.slice(0, remainingSlots);
+
+    const newPhotos = filesToProcess.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      file,
+      previewUrl: URL.createObjectURL(file),
+      name: file.name,
+      sizeFormatted: formatFileSize(file.size)
+    }));
 
     setPhotos((prev) => [...prev, ...newPhotos]);
   };
@@ -51,6 +83,10 @@ export default function PhotoUploader({ photos = [], setPhotos }) {
       }
       return prev.filter((p) => p.id !== id);
     });
+    if (previewPhoto?.id === id) {
+      setPreviewPhoto(null);
+    }
+    setUploadError(null);
   };
 
   const clearAllPhotos = () => {
@@ -58,6 +94,8 @@ export default function PhotoUploader({ photos = [], setPhotos }) {
       if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
     });
     setPhotos([]);
+    setPreviewPhoto(null);
+    setUploadError(null);
   };
 
   // Drag and drop events
@@ -122,6 +160,23 @@ export default function PhotoUploader({ photos = [], setPhotos }) {
         className="hidden"
         id="camera-input"
       />
+
+      {/* Hata Bildirimi (Kota / Format) */}
+      {uploadError && (
+        <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl flex items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200 animate-in fade-in duration-150">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>{uploadError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setUploadError(null)}
+            className="p-1 text-amber-700 hover:text-amber-900 dark:text-amber-300 cursor-pointer text-xs font-bold"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Seçim Seçenekleri */}
       {photos.length === 0 ? (
@@ -274,6 +329,13 @@ export default function PhotoUploader({ photos = [], setPhotos }) {
           <p className="text-xs text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-200/80 dark:border-amber-900/60 leading-relaxed">
             💡 <strong>Önemli Hatırlatma:</strong> Mail uygulamanız açıldığında çektiğiniz veya seçtiğiniz {photos.length > 1 ? `${photos.length} adet fotoğrafı` : 'fotoğrafı'} e-postanıza <em>ek dosya (ataç / attachment)</em> olarak iliştirmeyi unutmayınız.
           </p>
+
+          {photos.reduce((acc, p) => acc + (p.file?.size || 0), 0) > 20 * 1024 * 1024 && (
+            <div className="flex items-center gap-2 p-2.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 rounded-xl text-xs text-red-900 dark:text-red-200">
+              <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+              <span>Görsellerin toplam boyutu 20 MB'ı aşıyor ({formatFileSize(photos.reduce((acc, p) => acc + (p.file?.size || 0), 0))}). Standart e-posta istemcileri 20-25 MB üzeri ekleri göndermekte zorlanabilir.</span>
+            </div>
+          )}
         </div>
       )}
 

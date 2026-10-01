@@ -46,3 +46,20 @@ export function scrollToElement(elementId) {
     }, 2000);
   }
 }
+
+/**
+ * Türkiye telefon numaralarını WhatsApp API için uluslararası formata (+90) dönüştürür.
+ * Örn: "0533 123 45 67" -> "https://api.whatsapp.com/send?phone=905331234567&text=..."
+ */
+export function formatWhatsAppUrl(rawPhone, text = '') {
+  if (!rawPhone) return null;
+  let digits = rawPhone.toString().replace(/[^0-9]/g, '');
+  if (!digits) return null;
+  if (digits.startsWith('0')) {
+    digits = '90' + digits.substring(1);
+  } else if (!digits.startsWith('90')) {
+    digits = '90' + digits;
+  }
+  const encodedText = text ? `&text=${encodeURIComponent(text)}` : '';
+  return `https://api.whatsapp.com/send?phone=${digits}${encodedText}`;
+}

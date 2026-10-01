@@ -12,9 +12,11 @@ import {
   CheckCircle2, 
   Edit3, 
   RotateCcw,
-  Sparkles
+  Sparkles,
+  Info
 } from 'lucide-react';
 import { ISTANBUL_DISTRICTS, ROAD_TYPES, findDistrictByName } from '../data/istanbulData';
+import { normalizeTurkish } from '../utils/helpers';
 
 export default function LocationPicker({
   locationData,
@@ -76,8 +78,16 @@ export default function LocationPicker({
           const data = await response.json();
           const addr = data.address || {};
 
-          const rawDistrict = addr.county || addr.town || addr.city_district || addr.district || addr.suburb || '';
-          const matchedDistrict = findDistrictByName(rawDistrict);
+          const rawDistrict = addr.county || addr.city_district || addr.town || addr.district || addr.municipality || '';
+          let matchedDistrict = findDistrictByName(rawDistrict);
+          if (!matchedDistrict && data.display_name) {
+            for (const d of ISTANBUL_DISTRICTS) {
+              if (normalizeTurkish(data.display_name).includes(normalizeTurkish(d.district))) {
+                matchedDistrict = d;
+                break;
+              }
+            }
+          }
 
           const neighbourhood = addr.suburb || addr.neighbourhood || addr.quarter || addr.village || '';
           const road = addr.road || addr.pedestrian || addr.street || '';
@@ -151,17 +161,31 @@ export default function LocationPicker({
         districtName: selected ? selected.district : ''
       };
       
-      const parts = [
-        updated.road,
-        updated.buildingNo ? `No: ${updated.buildingNo}` : '',
-        updated.neighbourhood,
-        updated.landmark ? `(${updated.landmark})` : '',
-        updated.districtName ? `${updated.districtName} / İstanbul` : 'İstanbul'
-      ].filter(Boolean);
+      const hasDetailedFields = Boolean(updated.road || updated.neighbourhood || updated.buildingNo || updated.landmark);
+      let newFullAddress = prev.fullAddress;
+
+      if (hasDetailedFields) {
+        const parts = [
+          updated.road,
+          updated.buildingNo ? `No: ${updated.buildingNo}` : '',
+          updated.neighbourhood,
+          updated.landmark ? `(${updated.landmark})` : '',
+          updated.districtName ? `${updated.districtName} / İstanbul` : 'İstanbul'
+        ].filter(Boolean);
+        newFullAddress = parts.join(', ');
+      } else if (prev.fullAddress) {
+        if (prev.districtName && prev.fullAddress.includes(prev.districtName)) {
+          newFullAddress = prev.fullAddress.replace(prev.districtName, updated.districtName || '');
+        } else if (!prev.districtName && updated.districtName) {
+          newFullAddress = `${prev.fullAddress}, ${updated.districtName} / İstanbul`;
+        }
+      } else if (updated.districtName) {
+        newFullAddress = `${updated.districtName} / İstanbul`;
+      }
 
       return {
         ...updated,
-        fullAddress: parts.join(', ')
+        fullAddress: newFullAddress
       };
     });
   };
@@ -267,12 +291,24 @@ export default function LocationPicker({
         </div>
       )}
 
+      {/* GPS Çözümlendi ancak İlçe Eşleşmediyse Bildirim */}
+      {locationData.latitude && !locationData.districtObj && roadType !== 'highway' && (
+        <div className="flex items-center gap-2 p-2.5 mb-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-xl text-xs text-blue-900 dark:text-blue-200 animate-in fade-in duration-150">
+          <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+          <span>Koordinat alındı ancak ilçe otomatik çözümlenemedi. Lütfen açılır listeden ilgili <strong>ilçenizi seçiniz</strong>.</span>
+        </div>
+      )}
+
       {/* Ana Adres ve İlçe Satırı */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         {/* İlçe Seçimi */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            İlçe (İstanbul): <span className="text-red-500">*</span>
+            İlçe (İstanbul): {roadType !== 'highway' ? (
+              <span className="text-red-500">*</span>
+            ) : (
+              <span className="text-slate-400 font-normal text-[11px] ml-1">(Otoyollar için opsiyonel)</span>
+            )}
           </label>
           <select
             value={locationData.districtObj?.id || ''}

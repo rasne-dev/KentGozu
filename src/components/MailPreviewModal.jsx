@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Mail, 
   Send, 
@@ -11,6 +11,7 @@ import {
   Info,
   Sparkles
 } from 'lucide-react';
+import { formatWhatsAppUrl } from '../utils/helpers';
 
 export default function MailPreviewModal({
   isOpen,
@@ -24,8 +25,18 @@ export default function MailPreviewModal({
   authorities,
   photoCount = 0
 }) {
-  const [copied, setCopied] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
   const [showMailOpeningHint, setShowMailOpeningHint] = useState(false);
+
+  // Escape tuşu ile pencereyi kapatma
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -41,10 +52,15 @@ export default function MailPreviewModal({
     ? `https://www.google.com/maps?q=${locationData.latitude},${locationData.longitude}`
     : 'Belirtilmedi';
 
-  const dateStr = new Date().toLocaleString('tr-TR', {
-    dateStyle: 'long',
-    timeStyle: 'short'
-  });
+  let dateStr = '';
+  try {
+    dateStr = new Date().toLocaleString('tr-TR', {
+      dateStyle: 'long',
+      timeStyle: 'short'
+    });
+  } catch {
+    dateStr = new Date().toLocaleString('tr-TR');
+  }
 
   const attachmentSection = photoCount > 0
     ? `\n■ EKLER:\n- Olay yerini gösteren ${photoCount > 1 ? `${photoCount} adet fotoğraf` : 'fotoğraf'} ek olarak iliştirilmiştir.\n`
@@ -74,14 +90,21 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
 
   const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(primaryEmail)}${ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : ''}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-  const handleCopy = async () => {
+  const outlookWebUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(primaryEmail)}${ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : ''}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  const handleCopyText = async (text, fieldName) => {
     try {
-      await navigator.clipboard.writeText(body);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      await navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 2000);
     } catch (err) {
       console.error('Kopyalanamadı', err);
     }
+  };
+
+  const handleCopyAll = async () => {
+    const fullContent = `KİME: ${primaryEmail}\n${ccEmails ? `BİLGİ (CC): ${ccEmails}\n` : ''}KONU: ${subject}\n\n${body}`;
+    handleCopyText(fullContent, 'all');
   };
 
   const handleSendMail = () => {
@@ -92,9 +115,8 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
   };
 
   const primaryAuthObj = authorities.find((a) => a.email === primaryEmail);
-  const whatsappNum = primaryAuthObj?.whatsapp?.replace(/[^0-9]/g, '');
-  const whatsappUrl = whatsappNum
-    ? `https://api.whatsapp.com/send?phone=${whatsappNum}&text=${encodeURIComponent(`*${subject}*\n\n${body}`)}`
+  const whatsappUrl = primaryAuthObj?.whatsapp
+    ? formatWhatsAppUrl(primaryAuthObj.whatsapp, `*${subject}*\n\n${body}`)
     : null;
 
   const whatsappInstitutionName = primaryAuthObj?.district 
@@ -128,51 +150,105 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
         {/* Modal Content */}
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Gönderilecek Adresler Özeti */}
-          <div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-500 dark:text-slate-400 w-16">Kime (To):</span>
-              <span className="font-mono font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/70 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-800">
-                {primaryEmail}
-              </span>
-            </div>
-            {ccEmails && (
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-500 dark:text-slate-400 w-16">Bilgi (CC):</span>
-                <span className="font-mono text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-700 truncate">
-                  {ccEmails}
+          <div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 truncate">
+                <span className="font-semibold text-slate-500 dark:text-slate-400 w-16 shrink-0">Kime (To):</span>
+                <span className="font-mono font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/70 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-800 truncate">
+                  {primaryEmail}
                 </span>
               </div>
+              <button
+                type="button"
+                onClick={() => handleCopyText(primaryEmail, 'primary')}
+                className="p-1 rounded-md text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shrink-0 transition-colors"
+                title="Kime e-posta adresini kopyala"
+              >
+                {copiedField === 'primary' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {ccEmails && (
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="font-semibold text-slate-500 dark:text-slate-400 w-16 shrink-0">Bilgi (CC):</span>
+                  <span className="font-mono text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-700 truncate">
+                    {ccEmails}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopyText(ccEmails, 'cc')}
+                  className="p-1 rounded-md text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shrink-0 transition-colors"
+                  title="CC e-posta adreslerini kopyala"
+                >
+                  {copiedField === 'cc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             )}
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-500 dark:text-slate-400 w-16">Konu:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">{subject}</span>
+
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 truncate">
+                <span className="font-semibold text-slate-500 dark:text-slate-400 w-16 shrink-0">Konu:</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 truncate">{subject}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleCopyText(subject, 'subject')}
+                className="p-1 rounded-md text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shrink-0 transition-colors"
+                title="Konu başlığını kopyala"
+              >
+                {copiedField === 'subject' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
             </div>
           </div>
 
           {/* Mail Metni Önizlemesi */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 Dilekçe & Başvuru Metni (3071 Sayılı Kanun Uyarınca):
               </span>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">Kopyalandı!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Metni Kopyala</span>
-                  </>
-                )}
-              </button>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <button
+                  type="button"
+                  onClick={handleCopyAll}
+                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-800/80 transition-colors"
+                  title="Kime, CC, Konu ve Gövde metnini birlikte kopyala"
+                >
+                  {copiedField === 'all' ? (
+                    <>
+                      <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">Tümü Kopyalandı!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      <span>Tümünü Kopyala</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopyText(body, 'body')}
+                  className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-800/80 transition-colors"
+                >
+                  {copiedField === 'body' ? (
+                    <>
+                      <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">Kopyalandı!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      <span>Metni Kopyala</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
             <textarea
               readOnly
@@ -226,10 +302,33 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
               href={gmailWebUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
+              title="Gmail Web İstemcisinde Aç"
             >
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="w-3.5 h-3.5" />
               <span>Gmail Web</span>
+            </a>
+
+            <a
+              href={outlookWebUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
+              title="Outlook veya Hotmail Web İstemcisinde Aç"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Outlook Web</span>
+            </a>
+
+            <a
+              href="https://www.cimer.gov.tr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
+              title="Cumhurbaşkanlığı İletişim Merkezi (CİMER) Resmi Başvuru Portalı"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>CİMER</span>
             </a>
 
             <button

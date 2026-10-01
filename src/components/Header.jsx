@@ -30,7 +30,7 @@ export default function Header({ activeTab, setActiveTab, onOpenLegal, onOpenOnb
           </div>
 
           {/* Navigation & Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full scrollbar-none py-0.5">
             <button
               onClick={() => setActiveTab('report')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${

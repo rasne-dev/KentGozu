@@ -25,7 +25,7 @@ import {
   ISKI_INFO,
   ELECTRICITY_COMPANIES
 } from '../data/istanbulData';
-import { normalizeTurkish } from '../utils/helpers';
+import { normalizeTurkish, formatWhatsAppUrl } from '../utils/helpers';
 
 export default function DirectoryView({ onSelectDistrictForReport }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,7 +99,9 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                   <Car className="w-3 h-3" />
                   Otoyol & D-100
                 </span>
-                <span className="text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300">ALO 159</span>
+                <a href="tel:159" className="text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                  ALO 159
+                </a>
               </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{KGM_INFO.name}</h4>
               <p className={`text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed ${expandedCards['kgm'] ? '' : 'line-clamp-2'}`}>
@@ -141,7 +143,9 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                   <Building2 className="w-3 h-3" />
                   Büyükşehir
                 </span>
-                <span className="text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300">ALO 153</span>
+                <a href="tel:153" className="text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  ALO 153
+                </a>
               </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{IBB_INFO.name}</h4>
               <p className={`text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed ${expandedCards['ibb'] ? '' : 'line-clamp-2'}`}>
@@ -183,7 +187,9 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                   <Droplet className="w-3 h-3" />
                   Altyapı & Mazgal
                 </span>
-                <span className="text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300">ALO 185</span>
+                <a href="tel:185" className="text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
+                  ALO 185
+                </a>
               </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{ISKI_INFO.name}</h4>
               <p className={`text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed ${expandedCards['iski'] ? '' : 'line-clamp-2'}`}>
@@ -225,16 +231,48 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                   <Zap className="w-3 h-3" />
                   Aydınlatma & Enerji
                 </span>
-                <span className="text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300">ALO 186</span>
+                <a href="tel:186" className="text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                  ALO 186
+                </a>
               </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">BEDAŞ & AYEDAŞ Dağıtım</h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Avrupa Yakası BEDAŞ (<span className="font-mono">alo186@bedas.com.tr</span>), Anadolu Yakası AYEDAŞ (<span className="font-mono">iletisim@ayedas.com.tr</span>) elektrik direkleri ve sokak lambası yetkilisidir.
+                Avrupa Yakası BEDAŞ, Anadolu Yakası AYEDAŞ sokak aydınlatmaları ve elektrik direkleri sorumlusudur.
               </p>
+              <div className="space-y-1.5 mt-2.5">
+                <div className="flex items-center justify-between text-[11px] bg-slate-50 dark:bg-slate-800/60 px-2 py-1 rounded-lg">
+                  <a href="mailto:alo186@bedas.com.tr" className="font-mono text-blue-600 dark:text-blue-400 hover:underline truncate">
+                    alo186@bedas.com.tr (BEDAŞ)
+                  </a>
+                  <button
+                    type="button"
+                    onClick={(e) => handleCopyEmail('alo186@bedas.com.tr', e)}
+                    className="p-1 text-slate-400 hover:text-blue-600 cursor-pointer"
+                    title="BEDAŞ e-postasını kopyala"
+                  >
+                    {copiedEmail === 'alo186@bedas.com.tr' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between text-[11px] bg-slate-50 dark:bg-slate-800/60 px-2 py-1 rounded-lg">
+                  <a href="mailto:iletisim@ayedas.com.tr" className="font-mono text-blue-600 dark:text-blue-400 hover:underline truncate">
+                    iletisim@ayedas.com.tr (AYEDAŞ)
+                  </a>
+                  <button
+                    type="button"
+                    onClick={(e) => handleCopyEmail('iletisim@ayedas.com.tr', e)}
+                    className="p-1 text-slate-400 hover:text-blue-600 cursor-pointer"
+                    title="AYEDAŞ e-postasını kopyala"
+                  >
+                    {copiedEmail === 'iletisim@ayedas.com.tr' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 mt-3 flex items-center justify-between text-xs">
-              <span className="text-slate-500 text-[11px]">Avrupa & Anadolu</span>
-              <span className="text-amber-600 dark:text-amber-400 font-semibold text-[11px]">ALO 186</span>
+            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 mt-2.5 flex items-center justify-between text-xs">
+              <span className="text-slate-500 text-[11px]">Elektrik Arıza</span>
+              <a href="tel:186" className="text-amber-600 dark:text-amber-400 font-semibold text-[11px] hover:underline">
+                ALO 186
+              </a>
             </div>
           </div>
         </div>
@@ -343,10 +381,10 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
 
                   <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400 my-2.5">
                     <div className="flex items-center justify-between gap-1.5 font-mono text-blue-600 dark:text-blue-400 bg-slate-50 dark:bg-slate-800/60 px-2 py-1 rounded-lg">
-                      <div className="flex items-center gap-1.5 truncate">
+                      <a href={`mailto:${d.email}`} className="flex items-center gap-1.5 truncate hover:underline">
                         <Mail className="w-3.5 h-3.5 shrink-0" />
                         <span className="truncate">{d.email}</span>
-                      </div>
+                      </a>
                       <button
                         type="button"
                         onClick={(e) => handleCopyEmail(d.email, e)}
@@ -357,16 +395,26 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 px-1">
+                    <a 
+                      href={`tel:${d.phone.replace(/[^0-9]/g, '')}`}
+                      className="flex items-center gap-1.5 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 px-1 transition-colors"
+                      title="Telefonla ara"
+                    >
                       <Phone className="w-3.5 h-3.5 shrink-0" />
                       <span>{d.phone}</span>
-                    </div>
+                    </a>
 
                     {d.whatsapp && (
-                      <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 px-1">
+                      <a
+                        href={formatWhatsAppUrl(d.whatsapp)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 px-1 transition-colors hover:underline"
+                        title="WhatsApp ihbar hattına mesaj gönder"
+                      >
                         <MessageSquare className="w-3.5 h-3.5 shrink-0" />
                         <span>WP: {d.whatsapp}</span>
-                      </div>
+                      </a>
                     )}
                   </div>
                 </div>

@@ -4,33 +4,47 @@ import { Building2, Check, Mail, Phone, ShieldCheck, Info } from 'lucide-react';
 export default function AuthoritySelector({
   authorities,
   selectedEmails,
-  toggleEmailSelection
+  toggleEmailSelection,
+  onSetSelectedEmails,
+  isInvalid = false
 }) {
   const selectAll = () => {
-    authorities.forEach((auth) => {
-      if (!selectedEmails.includes(auth.email)) {
-        toggleEmailSelection(auth.email);
-      }
-    });
-  };
-
-  const selectOnlyPrimary = () => {
-    const primary = authorities.find((a) => a.isPrimary) || authorities[0];
-    if (primary) {
+    if (onSetSelectedEmails) {
+      onSetSelectedEmails(authorities.map((a) => a.email));
+    } else {
       authorities.forEach((auth) => {
-        if (auth.email === primary.email && !selectedEmails.includes(auth.email)) {
-          toggleEmailSelection(auth.email);
-        } else if (auth.email !== primary.email && selectedEmails.includes(auth.email)) {
+        if (!selectedEmails.includes(auth.email)) {
           toggleEmailSelection(auth.email);
         }
       });
     }
   };
 
+  const selectOnlyPrimary = () => {
+    const primary = authorities.find((a) => a.isPrimary) || authorities[0];
+    if (primary) {
+      if (onSetSelectedEmails) {
+        onSetSelectedEmails([primary.email]);
+      } else {
+        authorities.forEach((auth) => {
+          if (auth.email === primary.email && !selectedEmails.includes(auth.email)) {
+            toggleEmailSelection(auth.email);
+          } else if (auth.email !== primary.email && selectedEmails.includes(auth.email)) {
+            toggleEmailSelection(auth.email);
+          }
+        });
+      }
+    }
+  };
+
   return (
     <div 
       id="step-authority-selector" 
-      className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5 transition-colors"
+      className={`bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border transition-all ${
+        isInvalid 
+          ? 'border-red-500 ring-2 ring-red-500/20 shadow-md' 
+          : 'border-slate-200 dark:border-slate-800 shadow-xs'
+      } space-y-3.5`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">

@@ -18,7 +18,7 @@ import LocationPicker from './LocationPicker';
 import PhotoUploader from './PhotoUploader';
 import AuthoritySelector from './AuthoritySelector';
 import MailPreviewModal from './MailPreviewModal';
-import { determineResponsibleAuthorities } from '../data/istanbulData';
+import { determineResponsibleAuthorities, ISTANBUL_DISTRICTS } from '../data/istanbulData';
 import { ISSUE_TYPES } from '../data/issueTypes';
 import { scrollToElement } from '../utils/helpers';
 
@@ -27,14 +27,15 @@ export default function ReportForm({ preselectedDistrict }) {
   const isMock = urlParams?.get('mock') === '1';
   const isPreview = urlParams?.get('preview') === '1';
 
-  const kadikoyDistrict = {
+  const kadikoyDistrict = ISTANBUL_DISTRICTS.find((d) => d.id === 'kadikoy') || {
     id: 'kadikoy',
     name: 'Kadıköy Belediyesi',
     district: 'Kadıköy',
     side: 'Anadolu',
-    email: 'baskanlik@kadikoy.bel.tr',
+    email: 'iletisim@kadikoy.bel.tr',
     phone: '444 55 22',
-    address: 'Hasanpaşa Mah. Fahrettin Kerim Gökay Cad. No:2 Kadıköy'
+    whatsapp: '0533 155 55 22',
+    website: 'https://www.kadikoy.bel.tr'
   };
 
   // Form durumları
@@ -54,26 +55,47 @@ export default function ReportForm({ preselectedDistrict }) {
   const [roadType, setRoadType] = useState(isMock ? 'main_artery' : 'neighborhood');
   const [photos, setPhotos] = useState([]);
   const [userNote, setUserNote] = useState(isMock ? 'Bağdat Caddesi üzerinde sağ şeritte yaklaşık 20 cm derinliğinde, araç ve motosiklet trafiğini tehlikeye atan derin bir çukur oluşmuştur. Acilen asfalt yama yapılması gerekmektedir.' : '');
-  const [userName, setUserName] = useState(isMock ? 'Vatandaş Bildirimi' : '');
+  const [userName, setUserName] = useState(() => {
+    if (isMock) return 'Vatandaş Bildirimi';
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('kentgozu-user-name') || '';
+    }
+    return '';
+  });
   const [isDisclaimerAccepted, setIsDisclaimerAccepted] = useState(isMock);
+  const [districtAlertDismissed, setDistrictAlertDismissed] = useState(false);
 
   // Dinamik yetkililer
   const [authorities, setAuthorities] = useState([]);
   const [selectedEmails, setSelectedEmails] = useState([]);
 
-  // Validasyon hata mesajı
+  // Validasyon hata mesajı ve aktif hata adımı
   const [validationError, setValidationError] = useState(null);
+  const [validationStep, setValidationStep] = useState(null);
+
+  const clearValidation = () => {
+    setValidationError(null);
+    setValidationStep(null);
+  };
 
   // Modal durumu
   const [isModalOpen, setIsModalOpen] = useState(isMock && isPreview);
 
   useEffect(() => {
     if (preselectedDistrict) {
-      setLocationData((prev) => ({
-        ...prev,
-        districtObj: preselectedDistrict,
-        districtName: preselectedDistrict.district
-      }));
+      setLocationData((prev) => {
+        let newFullAddress = prev.fullAddress;
+        if (!prev.fullAddress || prev.fullAddress.endsWith('İstanbul')) {
+          newFullAddress = `${preselectedDistrict.district} / İstanbul`;
+        }
+        return {
+          ...prev,
+          districtObj: preselectedDistrict,
+          districtName: preselectedDistrict.district,
+          fullAddress: newFullAddress
+        };
+      });
+      clearValidation();
     }
   }, [preselectedDistrict]);
 
@@ -90,7 +112,7 @@ export default function ReportForm({ preselectedDistrict }) {
 
   const handleSelectIssue = (issue) => {
     setSelectedIssue(issue);
-    setValidationError(null);
+    clearValidation();
     if (issue) {
       const sample = (issue.placeholder || '').replace(/^Örn:\s*/, '');
       const sampleTexts = ISSUE_TYPES.map((i) => (i.placeholder || '').replace(/^Örn:\s*/, ''));
@@ -102,6 +124,7 @@ export default function ReportForm({ preselectedDistrict }) {
   };
 
   const toggleEmailSelection = (email) => {
+    clearValidation();
     setSelectedEmails((prev) => {
       if (prev.includes(email)) {
         if (prev.length === 1) return prev;
@@ -114,28 +137,32 @@ export default function ReportForm({ preselectedDistrict }) {
 
   const handleOpenPreview = (e) => {
     e.preventDefault();
-    setValidationError(null);
+    clearValidation();
 
     if (!selectedIssue) {
       setValidationError('Lütfen bildirmek istediğiniz sorun türünü seçiniz (Adım 1).');
+      setValidationStep(1);
       scrollToElement('step-issue-selector');
       return;
     }
 
     if (!locationData.districtObj && roadType !== 'highway') {
       setValidationError('Lütfen sorunun bulunduğu ilçeyi seçiniz veya GPS ile konumunuzu belirleyiniz (Adım 2).');
+      setValidationStep(2);
       scrollToElement('step-location-picker');
       return;
     }
 
     if (selectedEmails.length === 0) {
       setValidationError('Lütfen en az bir yetkili kurum e-posta adresi seçiniz (Adım 5).');
+      setValidationStep(5);
       scrollToElement('step-authority-selector');
       return;
     }
 
     if (!isDisclaimerAccepted) {
       setValidationError('Devam etmeden önce lütfen yasal sorumluluk onay kutusunu işaretleyiniz (Adım 6).');
+      setValidationStep(6);
       scrollToElement('step-disclaimer');
       return;
     }
@@ -169,6 +196,32 @@ export default function ReportForm({ preselectedDistrict }) {
           </p>
         </div>
       </div>
+
+      {/* Kurum Rehberinden Seçilen İlçe Bilgilendirme Bandı */}
+      {preselectedDistrict && !districtAlertDismissed && (
+        <div className="p-3.5 sm:p-4 bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/80 rounded-2xl flex items-center justify-between gap-3 text-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+              <Check className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold text-emerald-900 dark:text-emerald-200 block">
+                {preselectedDistrict.district} Belediyesi Seçildi
+              </span>
+              <p className="text-emerald-800/90 dark:text-emerald-300/90 text-[11px]">
+                Rehberden seçtiğiniz ilçe forma tanımlandı. Aşağıdan sorun türünü seçerek devam edebilirsiniz.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setDistrictAlertDismissed(true)}
+            className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 px-2 py-1 rounded-lg hover:bg-emerald-100/60 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer shrink-0"
+          >
+            Tamam
+          </button>
+        </div>
+      )}
 
       {/* Adım İlerleme Çubuğu (Stepper) */}
       <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-x-auto scrollbar-none">
@@ -274,7 +327,7 @@ export default function ReportForm({ preselectedDistrict }) {
         <IssueSelector
           selectedIssue={selectedIssue}
           onSelectIssue={handleSelectIssue}
-          isInvalid={validationError && !selectedIssue}
+          isInvalid={validationStep === 1}
         />
 
         {/* Adım 2: Konum ve Yol Sorumluluk Tipi */}
@@ -282,11 +335,14 @@ export default function ReportForm({ preselectedDistrict }) {
           locationData={locationData}
           setLocationData={(data) => {
             setLocationData(data);
-            setValidationError(null);
+            clearValidation();
           }}
           roadType={roadType}
-          setRoadType={setRoadType}
-          isInvalid={validationError && !locationData.districtObj && roadType !== 'highway'}
+          setRoadType={(type) => {
+            setRoadType(type);
+            clearValidation();
+          }}
+          isInvalid={validationStep === 2}
         />
 
         {/* Adım 3: Fotoğraf */}
@@ -373,7 +429,13 @@ export default function ReportForm({ preselectedDistrict }) {
                   type="text"
                   placeholder="Örn: Ahmet Yılmaz"
                   value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setUserName(val);
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('kentgozu-user-name', val);
+                    }
+                  }}
                   className="w-full pl-8 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
@@ -389,13 +451,18 @@ export default function ReportForm({ preselectedDistrict }) {
           authorities={authorities}
           selectedEmails={selectedEmails}
           toggleEmailSelection={toggleEmailSelection}
+          onSetSelectedEmails={(emails) => {
+            clearValidation();
+            setSelectedEmails(emails);
+          }}
+          isInvalid={validationStep === 5}
         />
 
         {/* Adım 6: Yasal Sorumluluk & Doğruluk Onay Kutusu */}
         <div 
           id="step-disclaimer"
           className={`p-4 rounded-2xl border transition-all ${
-            validationError && !isDisclaimerAccepted
+            validationStep === 6
               ? 'bg-red-50/80 dark:bg-red-950/40 border-red-500 ring-2 ring-red-500/20'
               : 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-200/90 dark:border-amber-900/60'
           }`}
@@ -406,7 +473,7 @@ export default function ReportForm({ preselectedDistrict }) {
               checked={isDisclaimerAccepted}
               onChange={(e) => {
                 setIsDisclaimerAccepted(e.target.checked);
-                setValidationError(null);
+                clearValidation();
               }}
               className="mt-0.5 w-4 h-4 text-blue-600 rounded border-amber-300 dark:border-amber-700 focus:ring-blue-500 cursor-pointer shrink-0"
             />
