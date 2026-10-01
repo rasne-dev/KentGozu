@@ -49,11 +49,11 @@ export default function AuthoritySelector({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="w-6 h-6 rounded-lg bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
-            5
+            4
           </span>
           <div>
             <label className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-              <span>Adım 5: Yetkili Kurumlar & İletişim Kanalları</span>
+              <span>Adım 4: Yetkili Kurumlar & İletişim Kanalları</span>
             </label>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Konumunuza ve aksaklık türüne göre otomatik eşleşen kurumlar. E-posta taslağınız bu adreslere iletilir.

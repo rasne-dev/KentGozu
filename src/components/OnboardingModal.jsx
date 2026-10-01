@@ -119,8 +119,8 @@ const ONBOARDING_STEPS = [
             <Camera className="w-4 h-4" />
           </div>
           <div className="text-xs">
-            <h4 className="font-semibold text-slate-900 dark:text-white">2. Sorun ve Fotoğrafı Ekleyin</h4>
-            <p className="text-slate-500 dark:text-slate-400 mt-0.5">Aksaklık tipini (çukur, aydınlatma, kaldırım vb.) seçin ve durumun fotoğrafını ekleyin.</p>
+            <h4 className="font-semibold text-slate-900 dark:text-white">2. Sorun ve Notunuzu Belirtin</h4>
+            <p className="text-slate-500 dark:text-slate-400 mt-0.5">Aksaklık tipini (çukur, aydınlatma, kaldırım vb.) seçin ve durumun açıklamasını yazın.</p>
           </div>
         </div>
 

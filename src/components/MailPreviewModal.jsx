@@ -22,8 +22,7 @@ export default function MailPreviewModal({
   userNote,
   userName,
   selectedEmails,
-  authorities,
-  photoCount = 0
+  authorities
 }) {
   const [copiedField, setCopiedField] = useState(null);
   const [showMailOpeningHint, setShowMailOpeningHint] = useState(false);
@@ -62,9 +61,7 @@ export default function MailPreviewModal({
     dateStr = new Date().toLocaleString('tr-TR');
   }
 
-  const attachmentSection = photoCount > 0
-    ? `\n■ EKLER:\n- Olay yerini gösteren ${photoCount > 1 ? `${photoCount} adet fotoğraf` : 'fotoğraf'} ek olarak iliştirilmiştir.\n`
-    : '';
+  const attachmentSection = `\n■ EKLER:\n- Varsa olay yerini gösteren fotoğraflar e-posta ekinde sunulmuştur.\n`;
 
   const body = `Sayın İlgili Kurum ve Belediye Yetkilileri,
 
@@ -258,14 +255,12 @@ ${userName.trim() ? `Vatandaş: ${userName.trim()}` : 'Bir Kent Sakini'}
             />
           </div>
 
-          {photoCount > 0 && (
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-2xl text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <div>
-                <strong>{photoCount > 1 ? `${photoCount} Adet Fotoğrafı Eklemeyi Unutmayın:` : 'Fotoğrafı Eklemeyi Unutmayın:'}</strong> E-posta uygulamanız açıldığında çektiğiniz {photoCount > 1 ? 'fotoğrafları' : 'fotoğrafı'} iletinizin <em>"Dosya Ekle" (Attachment)</em> butonuyla ekleyiniz.
-              </div>
+          <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-2xl text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <div>
+              <strong>Fotoğraf Ekleme Notu:</strong> Varsa olay yeri fotoğraflarını mail uygulamanızdaki ataç (ek dosya) butonundan ekleyiniz.
             </div>
-          )}
+          </div>
 
           {showMailOpeningHint && (
             <div className="p-3 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900 rounded-2xl text-xs text-blue-900 dark:text-blue-200 flex items-center gap-2 animate-in fade-in duration-150">

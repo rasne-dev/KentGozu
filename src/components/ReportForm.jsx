@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import IssueSelector from './IssueSelector';
 import LocationPicker from './LocationPicker';
-import PhotoUploader from './PhotoUploader';
 import AuthoritySelector from './AuthoritySelector';
 import MailPreviewModal from './MailPreviewModal';
 import { determineResponsibleAuthorities, ISTANBUL_DISTRICTS } from '../data/istanbulData';
@@ -53,7 +52,6 @@ export default function ReportForm({ preselectedDistrict }) {
     isDetected: isMock
   });
   const [roadType, setRoadType] = useState(isMock ? 'main_artery' : 'neighborhood');
-  const [photos, setPhotos] = useState([]);
   const [userNote, setUserNote] = useState(isMock ? 'Bağdat Caddesi üzerinde sağ şeritte yaklaşık 20 cm derinliğinde, araç ve motosiklet trafiğini tehlikeye atan derin bir çukur oluşmuştur. Acilen asfalt yama yapılması gerekmektedir.' : '');
   const [userName, setUserName] = useState(() => {
     if (isMock) return 'Vatandaş Bildirimi';
@@ -154,15 +152,15 @@ export default function ReportForm({ preselectedDistrict }) {
     }
 
     if (selectedEmails.length === 0) {
-      setValidationError('Lütfen en az bir yetkili kurum e-posta adresi seçiniz (Adım 5).');
-      setValidationStep(5);
+      setValidationError('Lütfen en az bir yetkili kurum e-posta adresi seçiniz (Adım 4).');
+      setValidationStep(4);
       scrollToElement('step-authority-selector');
       return;
     }
 
     if (!isDisclaimerAccepted) {
-      setValidationError('Devam etmeden önce lütfen yasal sorumluluk onay kutusunu işaretleyiniz (Adım 6).');
-      setValidationStep(6);
+      setValidationError('Devam etmeden önce lütfen yasal sorumluluk onay kutusunu işaretleyiniz (Adım 5).');
+      setValidationStep(5);
       scrollToElement('step-disclaimer');
       return;
     }
@@ -173,10 +171,8 @@ export default function ReportForm({ preselectedDistrict }) {
   // İlerleme adımları hesaplama
   const isStep1Done = Boolean(selectedIssue);
   const isStep2Done = Boolean(locationData.districtObj || roadType === 'highway');
-  const isStep3Done = photos.length > 0;
-  const isStep4Done = userNote.trim().length > 0;
-  const isStep5Done = selectedEmails.length > 0;
-  const isStep6Done = isDisclaimerAccepted;
+  const isStep3Done = userNote.trim().length > 0;
+  const isStep4Done = selectedEmails.length > 0;
 
   return (
     <div className="space-y-6">
@@ -223,9 +219,9 @@ export default function ReportForm({ preselectedDistrict }) {
         </div>
       )}
 
-      {/* Adım İlerleme Çubuğu (Stepper) */}
+      {/* Adım İlerleme Çubuğu (Stepper - 4 Adım) */}
       <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-x-auto scrollbar-none">
-        <div className="flex items-center justify-between min-w-[500px] text-xs">
+        <div className="flex items-center justify-between min-w-[400px] text-xs">
           <button 
             type="button" 
             onClick={() => scrollToElement('step-issue-selector')}
@@ -262,7 +258,7 @@ export default function ReportForm({ preselectedDistrict }) {
 
           <button 
             type="button" 
-            onClick={() => scrollToElement('step-photo-uploader')}
+            onClick={() => scrollToElement('step-description')}
             className="flex items-center gap-1.5 cursor-pointer group"
           >
             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
@@ -271,23 +267,6 @@ export default function ReportForm({ preselectedDistrict }) {
               {isStep3Done ? '✓' : '3'}
             </span>
             <span className={`font-semibold ${isStep3Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
-              Fotoğraf {photos.length > 0 && `(${photos.length})`}
-            </span>
-          </button>
-
-          <span className="text-slate-300 dark:text-slate-700">──</span>
-
-          <button 
-            type="button" 
-            onClick={() => scrollToElement('step-description')}
-            className="flex items-center gap-1.5 cursor-pointer group"
-          >
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-              isStep4Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-            }`}>
-              {isStep4Done ? '✓' : '4'}
-            </span>
-            <span className={`font-semibold ${isStep4Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
               Açıklama
             </span>
           </button>
@@ -300,11 +279,11 @@ export default function ReportForm({ preselectedDistrict }) {
             className="flex items-center gap-1.5 cursor-pointer group"
           >
             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-              isStep5Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              isStep4Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
-              {isStep5Done ? '✓' : '5'}
+              {isStep4Done ? '✓' : '4'}
             </span>
-            <span className={`font-semibold ${isStep5Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+            <span className={`font-semibold ${isStep4Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
               Yetkili Kurum
             </span>
           </button>
@@ -345,13 +324,7 @@ export default function ReportForm({ preselectedDistrict }) {
           isInvalid={validationStep === 2}
         />
 
-        {/* Adım 3: Fotoğraf */}
-        <PhotoUploader
-          photos={photos}
-          setPhotos={setPhotos}
-        />
-
-        {/* Adım 4: Açıklama ve Vatandaş Bilgisi */}
+        {/* Adım 3: Açıklama ve Vatandaş Bilgisi */}
         <div 
           id="step-description"
           className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 transition-colors"
@@ -360,11 +333,11 @@ export default function ReportForm({ preselectedDistrict }) {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 rounded-lg bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
-                  4
+                  3
                 </span>
                 <label className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                   <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span>Adım 4: Sorun Açıklaması & Notunuz</span>
+                  <span>Adım 3: Sorun Açıklaması & Notunuz</span>
                 </label>
               </div>
 
@@ -418,6 +391,11 @@ export default function ReportForm({ preselectedDistrict }) {
             </div>
           </div>
 
+          <div className="p-3 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 rounded-xl text-xs text-blue-900 dark:text-blue-200 flex items-center gap-2.5">
+            <Camera className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span>Varsa olay yeri fotoğraflarını mail uygulamanızdaki ataç butonundan ekleyiniz.</span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
@@ -446,7 +424,7 @@ export default function ReportForm({ preselectedDistrict }) {
           </div>
         </div>
 
-        {/* Adım 5: Yetkili Kurumlar ve İletişim */}
+        {/* Adım 4: Yetkili Kurumlar ve İletişim */}
         <AuthoritySelector
           authorities={authorities}
           selectedEmails={selectedEmails}
@@ -455,14 +433,14 @@ export default function ReportForm({ preselectedDistrict }) {
             clearValidation();
             setSelectedEmails(emails);
           }}
-          isInvalid={validationStep === 5}
+          isInvalid={validationStep === 4}
         />
 
-        {/* Adım 6: Yasal Sorumluluk & Doğruluk Onay Kutusu */}
+        {/* Adım 5: Yasal Sorumluluk & Doğruluk Onay Kutusu */}
         <div 
           id="step-disclaimer"
           className={`p-4 rounded-2xl border transition-all ${
-            validationStep === 6
+            validationStep === 5
               ? 'bg-red-50/80 dark:bg-red-950/40 border-red-500 ring-2 ring-red-500/20'
               : 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-200/90 dark:border-amber-900/60'
           }`}
@@ -480,7 +458,7 @@ export default function ReportForm({ preselectedDistrict }) {
             <div className="space-y-1">
               <span className="text-xs font-bold text-amber-950 dark:text-amber-200 block flex items-center gap-1.5">
                 <Scale className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
-                <span>Adım 6: Yasal Sorumluluk ve Doğruluk Beyanı:</span>
+                <span>Adım 5: Yasal Sorumluluk ve Doğruluk Beyanı:</span>
               </span>
               <p className="text-xs text-amber-900/90 dark:text-amber-300/90 leading-relaxed">
                 Gönderilen iletilerdeki ifadelerin ve fotoğrafların doğruluğu tarafıma aittir. Kasıtlı asılsız ihbar veya hakaret niteliğindeki bildirimlerin yasal yaptırıma tabi olabileceğini kabul ve beyan ederim.
@@ -498,7 +476,7 @@ export default function ReportForm({ preselectedDistrict }) {
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
               {isDisclaimerAccepted
                 ? 'E-posta istemciniz açılacak; kontrol edip tek tıkla göndereceksiniz.'
-                : 'Devam etmek için lütfen Adım 6 onay kutusunu işaretleyiniz.'}
+                : 'Devam etmek için lütfen Adım 5 onay kutusunu işaretleyiniz.'}
             </span>
           </div>
 
@@ -527,7 +505,6 @@ export default function ReportForm({ preselectedDistrict }) {
         userName={userName}
         selectedEmails={selectedEmails}
         authorities={authorities}
-        photoCount={photos.length}
       />
     </div>
   );
