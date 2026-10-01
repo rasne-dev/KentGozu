@@ -10,7 +10,8 @@ import {
   AlertTriangle,
   Info,
   Sparkles,
-  ChevronDown
+  ChevronDown,
+  Camera
 } from 'lucide-react';
 import { formatWhatsAppUrl } from '../utils/helpers';
 
@@ -119,14 +120,14 @@ ${userName.trim() || 'Bir Kent Sakini'}
     }, 100);
   };
 
-  const primaryAuthObj = authorities.find((a) => a.email === primaryEmail);
-  const whatsappUrl = primaryAuthObj?.whatsapp
-    ? formatWhatsAppUrl(primaryAuthObj.whatsapp, `*${subject}*\n\n${body}`)
+  const authWithWhatsApp = authorities.find((a) => a.email === primaryEmail && a.whatsapp) || authorities.find((a) => a.whatsapp);
+  const whatsappUrl = authWithWhatsApp?.whatsapp
+    ? formatWhatsAppUrl(authWithWhatsApp.whatsapp, `*${subject}*\n\n${body}`)
     : null;
 
-  const whatsappInstitutionName = primaryAuthObj?.district 
-    ? `${primaryAuthObj.district} Bel.` 
-    : (primaryAuthObj?.shortName || primaryAuthObj?.name || '');
+  const whatsappInstitutionName = authWithWhatsApp?.district 
+    ? `${authWithWhatsApp.district} Bel.` 
+    : (authWithWhatsApp?.shortName || authWithWhatsApp?.name || '');
 
   return (
     <div
@@ -251,7 +252,7 @@ ${userName.trim() || 'Bir Kent Sakini'}
           </div>
 
           <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-2xl text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <Camera className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <div>
               <strong>Fotoğraf Ekleme Notu:</strong> Varsa olay yeri fotoğraflarını mail uygulamanızdaki ataç (ek dosya) butonundan ekleyiniz.
             </div>
@@ -288,20 +289,7 @@ ${userName.trim() || 'Bir Kent Sakini'}
               </button>
 
               {showOtherOptions && (
-                <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
-                  {whatsappUrl && (
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setShowOtherOptions(false)}
-                      className="flex items-center gap-2 px-3.5 py-2.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span className="truncate">WhatsApp İhbar{whatsappInstitutionName ? ` (${whatsappInstitutionName})` : ''}</span>
-                    </a>
-                  )}
-
+                <div className="absolute bottom-full mb-2 right-0 w-52 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
                   <a
                     href={outlookWebUrl}
                     target="_blank"
@@ -340,6 +328,19 @@ ${userName.trim() || 'Bir Kent Sakini'}
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Gmail Web</span>
             </a>
+
+            {/* WhatsApp İhbar Butonu (Varsa doğrudan görünür) */}
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>WhatsApp İhbar{whatsappInstitutionName ? ` (${whatsappInstitutionName})` : ''}</span>
+              </a>
+            )}
 
             {/* Birincil Aksiyon Butonu */}
             <button

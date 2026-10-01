@@ -10,6 +10,7 @@ import {
   Sparkles,
   MapPin,
   Camera,
+  MessageSquare,
   Mail,
   CheckCircle2,
   FileCheck,
@@ -116,7 +117,7 @@ const ONBOARDING_STEPS = [
 
         <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-start gap-3">
           <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">
-            <Camera className="w-4 h-4" />
+            <MessageSquare className="w-4 h-4" />
           </div>
           <div className="text-xs">
             <h4 className="font-semibold text-slate-900 dark:text-white">2. Sorun ve Notunuzu Belirtin</h4>

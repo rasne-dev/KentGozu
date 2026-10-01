@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Smartphone, Download, X, ArrowRight, ShieldCheck, Zap, Camera } from 'lucide-react';
+import { Smartphone, Download, X, ArrowRight, ShieldCheck, Zap, MapPin } from 'lucide-react';
 
 export default function MobileAppPrompt({ isOpen, onClose }) {
   useEffect(() => {
@@ -28,9 +28,15 @@ export default function MobileAppPrompt({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleDismiss();
+      }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer"
+    >
       <div 
-        className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200 text-slate-900 dark:text-slate-100"
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200 text-slate-900 dark:text-slate-100 cursor-default"
         role="dialog"
         aria-modal="true"
         aria-labelledby="apk-modal-title"
@@ -64,7 +70,7 @@ export default function MobileAppPrompt({ isOpen, onClose }) {
 
         {/* Content */}
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-          KentGözü'nü akıllı telefonunuzda daha akıcı, pratik ve doğrudan kamera desteğiyle kullanmak ister misiniz? Resmi Android uygulamasını cihazınıza hemen yükleyebilirsiniz.
+          KentGözü'nü akıllı telefonunuzda daha akıcı, pratik ve doğrudan GPS konum desteğiyle kullanmak ister misiniz? Resmi Android uygulamasını cihazınıza hemen yükleyebilirsiniz.
         </p>
 
         {/* Feature bullets */}
@@ -76,9 +82,9 @@ export default function MobileAppPrompt({ isOpen, onClose }) {
           </div>
 
           <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center gap-1">
-            <Camera className="w-4 h-4 text-blue-500" />
-            <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">Kamera</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400">Anında çekim</span>
+            <MapPin className="w-4 h-4 text-blue-500" />
+            <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">GPS Konum</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">Hassas tespit</span>
           </div>
 
           <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center gap-1">

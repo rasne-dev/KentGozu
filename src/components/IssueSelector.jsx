@@ -79,11 +79,13 @@ export default function IssueSelector({ selectedIssue, onSelectIssue, isInvalid 
       const cleanTitle = normalizeTurkish(issue.title);
       const cleanBadge = normalizeTurkish(issue.badge);
       const cleanPlaceholder = normalizeTurkish(issue.placeholder);
+      const matchesKeywords = Array.isArray(issue.keywords) && issue.keywords.some((k) => normalizeTurkish(k).includes(cleanTerm));
 
       return (
         cleanTitle.includes(cleanTerm) ||
         cleanBadge.includes(cleanTerm) ||
-        cleanPlaceholder.includes(cleanTerm)
+        cleanPlaceholder.includes(cleanTerm) ||
+        matchesKeywords
       );
     });
   }, [searchTerm, selectedCategoryTab]);

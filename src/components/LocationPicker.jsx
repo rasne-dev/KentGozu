@@ -81,12 +81,18 @@ export default function LocationPicker({
           const rawDistrict = addr.county || addr.city_district || addr.town || addr.district || addr.municipality || '';
           let matchedDistrict = findDistrictByName(rawDistrict);
           if (!matchedDistrict && data.display_name) {
-            for (const d of ISTANBUL_DISTRICTS) {
+            const sortedByLength = [...ISTANBUL_DISTRICTS].sort((a, b) => b.district.length - a.district.length);
+            for (const d of sortedByLength) {
               if (normalizeTurkish(data.display_name).includes(normalizeTurkish(d.district))) {
                 matchedDistrict = d;
                 break;
               }
             }
+          }
+
+          const province = addr.province || addr.state || addr.city || '';
+          if (province && !normalizeTurkish(province).includes('istanbul') && !matchedDistrict) {
+            setGeoError(`Alınan konum İstanbul dışında (${province}) görünüyor. KentGözü şu anda İstanbul genelinde hizmet vermektedir. Lütfen aşağıdaki listeden İstanbul ilçenizi seçiniz.`);
           }
 
           const neighbourhood = addr.suburb || addr.neighbourhood || addr.quarter || addr.village || '';

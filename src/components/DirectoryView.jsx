@@ -52,11 +52,13 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
     const cleanSearch = normalizeTurkish(searchTerm);
     return ISTANBUL_DISTRICTS.filter((d) => {
       const cleanDistrict = normalizeTurkish(d.district);
+      const cleanName = normalizeTurkish(d.name || '');
       const cleanPhone = (d.phone || '').replace(/\s+/g, '');
       const cleanEmail = normalizeTurkish(d.email);
 
       const matchesSearch = !cleanSearch ||
         cleanDistrict.includes(cleanSearch) ||
+        cleanName.includes(cleanSearch) ||
         cleanPhone.includes(cleanSearch) ||
         cleanEmail.includes(cleanSearch);
 
@@ -406,7 +408,7 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
 
                     {d.whatsapp && (
                       <a
-                        href={formatWhatsAppUrl(d.whatsapp)}
+                        href={formatWhatsAppUrl(d.whatsapp, 'Merhaba, kentsel aksaklık bildirimi için iletişime geçiyorum.')}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 px-1 transition-colors hover:underline"

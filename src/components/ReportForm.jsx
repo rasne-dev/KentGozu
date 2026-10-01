@@ -219,9 +219,9 @@ export default function ReportForm({ preselectedDistrict }) {
         </div>
       )}
 
-      {/* Adım İlerleme Çubuğu (Stepper - 4 Adım) */}
+      {/* Adım İlerleme Çubuğu (Stepper - 5 Adım) */}
       <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-x-auto scrollbar-none">
-        <div className="flex items-center justify-between min-w-[400px] text-xs">
+        <div className="flex items-center justify-between min-w-[460px] text-xs">
           <button 
             type="button" 
             onClick={() => scrollToElement('step-issue-selector')}
@@ -285,6 +285,23 @@ export default function ReportForm({ preselectedDistrict }) {
             </span>
             <span className={`font-semibold ${isStep4Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
               Yetkili Kurum
+            </span>
+          </button>
+
+          <span className="text-slate-300 dark:text-slate-700">──</span>
+
+          <button 
+            type="button" 
+            onClick={() => scrollToElement('step-disclaimer')}
+            className="flex items-center gap-1.5 cursor-pointer group"
+          >
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              isDisclaimerAccepted ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
+              {isDisclaimerAccepted ? '✓' : '5'}
+            </span>
+            <span className={`font-semibold ${isDisclaimerAccepted ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+              Yasal Onay
             </span>
           </button>
         </div>

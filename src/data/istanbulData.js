@@ -1,4 +1,4 @@
-import { normalizeTurkish } from '../utils/helpers';
+import { normalizeTurkish } from '../utils/helpers.js';
 
 // İstanbul ve Türkiye Yetkili Kamu Kurumları & İlçe Belediyeleri Veritabanı
 
