@@ -1,5 +1,6 @@
 import React from 'react';
-import { Building2, Check, Mail, Phone, ShieldCheck, Info } from 'lucide-react';
+import { Building2, Check, Mail, Phone, ShieldCheck, Info, MessageSquare } from 'lucide-react';
+import { getCleanPhoneNumber, formatWhatsAppUrl } from '../utils/helpers';
 
 export default function AuthoritySelector({
   authorities,
@@ -91,11 +92,23 @@ export default function AuthoritySelector({
         <div className="space-y-2.5">
           {authorities.map((auth) => {
             const isChecked = selectedEmails.includes(auth.email);
+            const cleanPhone = getCleanPhoneNumber(auth.phone);
+            const wpUrl = auth.whatsapp ? formatWhatsAppUrl(auth.whatsapp, 'Merhaba, kentsel aksaklık bildirimi için iletişime geçiyorum.') : null;
+
             return (
               <div
                 key={auth.email}
+                role="checkbox"
+                aria-checked={isChecked}
+                tabIndex={0}
                 onClick={() => toggleEmailSelection(auth.email)}
-                className={`p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                onKeyDown={(e) => {
+                  if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleEmailSelection(auth.email);
+                  }
+                }}
+                className={`p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
                   isChecked
                     ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/50 shadow-xs ring-1 ring-blue-500/20'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 opacity-70 hover:opacity-100'
@@ -131,11 +144,31 @@ export default function AuthoritySelector({
                         <Mail className="w-3.5 h-3.5" />
                         {auth.email}
                       </span>
-                      {auth.phone && (
-                        <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400">
+
+                      {auth.phone && cleanPhone && (
+                        <a
+                          href={`tel:${cleanPhone}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
+                          title="Telefonla doğrudan ara"
+                        >
                           <Phone className="w-3.5 h-3.5" />
-                          {auth.phone}
-                        </span>
+                          <span>{auth.phone}</span>
+                        </a>
+                      )}
+
+                      {wpUrl && (
+                        <a
+                          href={wpUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
+                          title="WhatsApp ihbar hattına mesaj at"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </a>
                       )}
                     </div>
 

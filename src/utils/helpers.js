@@ -34,22 +34,22 @@ export function formatFileSize(bytes) {
 }
 
 /**
- * İlgili DOM elementine akıcı bir şekilde odaklanıp kaydırır.
+ * İlgili DOM elementine akıcı bir şekilde odaklanıp kaydırır ve dikkat çeker.
  */
 export function scrollToElement(elementId) {
   const el = document.getElementById(elementId);
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    el.classList.add('ring-2', 'ring-amber-500', 'animate-pulse');
+    el.classList.add('outline-2', 'outline-blue-500', 'transition-all');
     setTimeout(() => {
-      el.classList.remove('ring-2', 'ring-amber-500', 'animate-pulse');
-    }, 2000);
+      el.classList.remove('outline-2', 'outline-blue-500', 'transition-all');
+    }, 1800);
   }
 }
 
 /**
- * Türkiye telefon numaralarını WhatsApp API için uluslararası formata (+90) dönüştürür.
- * Örn: "0533 123 45 67" -> "https://api.whatsapp.com/send?phone=905331234567&text=..."
+ * Türkiye telefon numaralarını WhatsApp evrensel bağlantısına (wa.me) dönüştürür.
+ * Örn: "0533 123 45 67" -> "https://wa.me/905331234567?text=..."
  */
 export function formatWhatsAppUrl(rawPhone, text = '') {
   if (!rawPhone) return null;
@@ -60,6 +60,21 @@ export function formatWhatsAppUrl(rawPhone, text = '') {
   } else if (!digits.startsWith('90')) {
     digits = '90' + digits;
   }
-  const encodedText = text ? `&text=${encodeURIComponent(text)}` : '';
-  return `https://api.whatsapp.com/send?phone=${digits}${encodedText}`;
+  const encodedText = text ? `?text=${encodeURIComponent(text)}` : '';
+  return `https://wa.me/${digits}${encodedText}`;
+}
+
+/**
+ * Telefon metnini güvenli tel: bağlantı numarasına dönüştürür.
+ * Birden fazla numara (örn: "ALO 159 / 0212 312 90 00") varsa birincil numarayı ayıklar.
+ */
+export function getCleanPhoneNumber(rawPhone) {
+  if (!rawPhone) return '';
+  const str = rawPhone.toString().trim();
+  // ALO 153, ALO 159, ALO 185, ALO 186 gibi kısa hat kontrolü
+  const shortMatch = str.match(/\b(15[39]|18[56])\b/);
+  if (shortMatch) return shortMatch[1];
+  // Eğik çizgi veya tireyle ayrılmış ilk kısmı al
+  const firstPart = str.split(/[\/|]/)[0].trim();
+  return firstPart.replace(/[^0-9]/g, '');
 }

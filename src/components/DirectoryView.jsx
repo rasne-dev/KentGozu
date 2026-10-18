@@ -25,7 +25,7 @@ import {
   ISKI_INFO,
   ELECTRICITY_COMPANIES
 } from '../data/istanbulData';
-import { normalizeTurkish, formatWhatsAppUrl } from '../utils/helpers';
+import { normalizeTurkish, formatWhatsAppUrl, getCleanPhoneNumber } from '../utils/helpers';
 
 export default function DirectoryView({ onSelectDistrictForReport }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -398,7 +398,7 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
                     </div>
 
                     <a 
-                      href={`tel:${d.phone.replace(/[^0-9]/g, '')}`}
+                      href={`tel:${getCleanPhoneNumber(d.phone)}`}
                       className="flex items-center gap-1.5 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 px-1 transition-colors"
                       title="Telefonla ara"
                     >

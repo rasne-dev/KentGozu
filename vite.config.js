@@ -9,4 +9,14 @@ export default defineConfig({
     tailwindcss(),
   ],
   base: './',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          leaflet: ['leaflet'],
+          vendor: ['react', 'react-dom']
+        }
+      }
+    }
+  }
 })

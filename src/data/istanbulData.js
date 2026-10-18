@@ -687,3 +687,47 @@ export function findDistrictByName(districtName) {
     return clean.includes(dClean) || (clean.length >= 4 && dClean.includes(clean));
   }) || null;
 }
+
+// İstanbul 39 İlçe Merkez Koordinatları (Leaflet Harita Merkezleme İçin)
+export const DISTRICT_COORDINATES = {
+  adalar: [40.8744, 29.1293],
+  arnavutkoy: [41.1852, 28.7408],
+  atasehir: [40.9833, 29.1167],
+  avcilar: [40.9801, 28.7175],
+  bagcilar: [41.0337, 28.8576],
+  bahcelievler: [41.0022, 28.8606],
+  bakirkoy: [40.9782, 28.8725],
+  basaksehir: [41.0969, 28.8037],
+  bayrampasa: [41.0347, 28.9126],
+  besiktas: [41.0428, 29.0077],
+  beykoz: [41.1176, 29.1008],
+  beylikduzu: [41.0037, 28.6508],
+  beyoglu: [41.0369, 28.9774],
+  buyukcekmece: [41.0214, 28.5839],
+  catalca: [41.1436, 28.4614],
+  cekmekoy: [41.0352, 29.1764],
+  esenler: [41.0384, 28.8872],
+  esenyurt: [41.0343, 28.6801],
+  eyupsultan: [41.0478, 28.9333],
+  fatih: [41.0186, 28.9497],
+  gaziosmanpasa: [41.0578, 28.9157],
+  gungoren: [41.0163, 28.8744],
+  kadikoy: [40.9927, 29.0277],
+  kagithane: [41.0811, 28.9744],
+  kartal: [40.8886, 29.1856],
+  kucukcekmece: [40.9919, 28.7714],
+  maltepe: [40.9247, 29.1311],
+  pendik: [40.8744, 29.2333],
+  sancaktepe: [41.0028, 29.2289],
+  sariyer: [41.1667, 29.0500],
+  silivri: [41.0736, 28.2478],
+  sultanbeyli: [40.9667, 29.2667],
+  sultangazi: [41.1047, 28.8697],
+  sile: [41.1764, 29.6133],
+  sisli: [41.0600, 28.9878],
+  tuzla: [40.8167, 29.3000],
+  umraniye: [41.0256, 29.1172],
+  uskudar: [41.0267, 29.0156],
+  zeytinburnu: [40.9903, 28.9039]
+};
+

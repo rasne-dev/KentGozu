@@ -105,7 +105,12 @@ export default function ReportForm({ preselectedDistrict }) {
     });
 
     setAuthorities(list);
-    setSelectedEmails(list.map((a) => a.email));
+    setSelectedEmails((prevSelected) => {
+      const newEmails = list.map((a) => a.email);
+      if (!prevSelected || prevSelected.length === 0) return newEmails;
+      const retained = prevSelected.filter((email) => newEmails.includes(email));
+      return retained.length > 0 ? retained : newEmails;
+    });
   }, [locationData.districtObj, roadType, selectedIssue]);
 
   const handleSelectIssue = (issue) => {
@@ -219,93 +224,103 @@ export default function ReportForm({ preselectedDistrict }) {
         </div>
       )}
 
-      {/* Adım İlerleme Çubuğu (Stepper - 5 Adım) */}
-      <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-x-auto scrollbar-none">
-        <div className="flex items-center justify-between min-w-[460px] text-xs">
+      {/* Adım İlerleme Çubuğu (Stepper - Responsive & Accessible) */}
+      <nav aria-label="Bildirim adımları" className="bg-white dark:bg-slate-900 p-2.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+        <div className="flex items-center justify-between w-full text-xs gap-1 sm:gap-2">
+          {/* Adım 1 */}
           <button 
             type="button" 
             onClick={() => scrollToElement('step-issue-selector')}
-            className="flex items-center gap-1.5 cursor-pointer group"
+            className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
+            aria-label="Adım 1: Sorun Türü"
           >
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isStep1Done ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'
             }`}>
               {isStep1Done ? '✓' : '1'}
             </span>
-            <span className={`font-semibold ${isStep1Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'}`}>
-              Sorun Türü
+            <span className={`font-semibold hidden xs:inline sm:inline text-[11px] sm:text-xs ${isStep1Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'}`}>
+              Sorun
             </span>
           </button>
 
-          <span className="text-slate-300 dark:text-slate-700">──</span>
+          <div className="flex-1 h-0.5 bg-slate-200 dark:bg-slate-700 min-w-1 sm:min-w-3" aria-hidden="true" />
 
+          {/* Adım 2 */}
           <button 
             type="button" 
             onClick={() => scrollToElement('step-location-picker')}
-            className="flex items-center gap-1.5 cursor-pointer group"
+            className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
+            aria-label="Adım 2: Konum"
           >
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isStep2Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
               {isStep2Done ? '✓' : '2'}
             </span>
-            <span className={`font-semibold ${isStep2Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+            <span className={`font-semibold hidden xs:inline sm:inline text-[11px] sm:text-xs ${isStep2Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
               Konum
             </span>
           </button>
 
-          <span className="text-slate-300 dark:text-slate-700">──</span>
+          <div className="flex-1 h-0.5 bg-slate-200 dark:bg-slate-700 min-w-1 sm:min-w-3" aria-hidden="true" />
 
+          {/* Adım 3 */}
           <button 
             type="button" 
             onClick={() => scrollToElement('step-description')}
-            className="flex items-center gap-1.5 cursor-pointer group"
+            className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
+            aria-label="Adım 3: Açıklama"
           >
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isStep3Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
               {isStep3Done ? '✓' : '3'}
             </span>
-            <span className={`font-semibold ${isStep3Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+            <span className={`font-semibold hidden xs:inline sm:inline text-[11px] sm:text-xs ${isStep3Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
               Açıklama
             </span>
           </button>
 
-          <span className="text-slate-300 dark:text-slate-700">──</span>
+          <div className="flex-1 h-0.5 bg-slate-200 dark:bg-slate-700 min-w-1 sm:min-w-3" aria-hidden="true" />
 
+          {/* Adım 4 */}
           <button 
             type="button" 
             onClick={() => scrollToElement('step-authority-selector')}
-            className="flex items-center gap-1.5 cursor-pointer group"
+            className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
+            aria-label="Adım 4: Yetkili Kurum"
           >
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isStep4Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
               {isStep4Done ? '✓' : '4'}
             </span>
-            <span className={`font-semibold ${isStep4Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
-              Yetkili Kurum
+            <span className={`font-semibold hidden xs:inline sm:inline text-[11px] sm:text-xs ${isStep4Done ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+              Yetkili
             </span>
           </button>
 
-          <span className="text-slate-300 dark:text-slate-700">──</span>
+          <div className="flex-1 h-0.5 bg-slate-200 dark:bg-slate-700 min-w-1 sm:min-w-3" aria-hidden="true" />
 
+          {/* Adım 5 */}
           <button 
             type="button" 
             onClick={() => scrollToElement('step-disclaimer')}
-            className="flex items-center gap-1.5 cursor-pointer group"
+            className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
+            aria-label="Adım 5: Yasal Onay"
           >
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isDisclaimerAccepted ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
               {isDisclaimerAccepted ? '✓' : '5'}
             </span>
-            <span className={`font-semibold ${isDisclaimerAccepted ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
-              Yasal Onay
+            <span className={`font-semibold hidden xs:inline sm:inline text-[11px] sm:text-xs ${isDisclaimerAccepted ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+              Onay
             </span>
           </button>
         </div>
-      </div>
+      </nav>
 
       {/* Validasyon Hata Bildirimi (Inline Alert) */}
       {validationError && (
@@ -352,7 +367,7 @@ export default function ReportForm({ preselectedDistrict }) {
                 <span className="w-6 h-6 rounded-lg bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
                   3
                 </span>
-                <label className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <label htmlFor="report-user-note" className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                   <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   <span>Adım 3: Sorun Açıklaması & Notunuz</span>
                 </label>
@@ -387,6 +402,7 @@ export default function ReportForm({ preselectedDistrict }) {
             </div>
 
             <textarea
+              id="report-user-note"
               rows={3}
               placeholder={
                 selectedIssue?.placeholder ||
@@ -415,12 +431,13 @@ export default function ReportForm({ preselectedDistrict }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="report-user-name" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Adınız Soyadınız (Opsiyonel):
               </label>
               <div className="relative">
                 <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
                 <input
+                  id="report-user-name"
                   type="text"
                   placeholder="Örn: Ahmet Yılmaz"
                   value={userName}
@@ -462,8 +479,9 @@ export default function ReportForm({ preselectedDistrict }) {
               : 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-200/90 dark:border-amber-900/60'
           }`}
         >
-          <label className="flex items-start gap-3 cursor-pointer select-none">
+          <label htmlFor="report-disclaimer-checkbox" className="flex items-start gap-3 cursor-pointer select-none">
             <input
+              id="report-disclaimer-checkbox"
               type="checkbox"
               checked={isDisclaimerAccepted}
               onChange={(e) => {

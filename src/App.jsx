@@ -127,15 +127,17 @@ export default function App() {
               <HelpCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>Nasıl Çalışır?</span>
             </button>
-            <a
-              href="https://github.com/rasne-dev/KentGozu/releases/latest"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400"
-            >
-              <Smartphone className="w-4 h-4" />
-              <span>Android APK</span>
-            </a>
+            {(!Capacitor.isNativePlatform() && !isScreenshot) && (
+              <a
+                href="https://github.com/rasne-dev/KentGozu/releases/latest"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400"
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>Android APK</span>
+              </a>
+            )}
             <button
               onClick={() => setIsLegalModalOpen(true)}
               className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 cursor-pointer"
