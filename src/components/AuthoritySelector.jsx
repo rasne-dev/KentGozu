@@ -100,6 +100,7 @@ export default function AuthoritySelector({
                 key={auth.email}
                 role="checkbox"
                 aria-checked={isChecked}
+                aria-label={`${auth.name} (${auth.role || 'Yetkili Kurum'}) seçimi`}
                 tabIndex={0}
                 onClick={() => toggleEmailSelection(auth.email)}
                 onKeyDown={(e) => {
@@ -108,7 +109,7 @@ export default function AuthoritySelector({
                     toggleEmailSelection(auth.email);
                   }
                 }}
-                className={`p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+                className={`p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
                   isChecked
                     ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/50 shadow-xs ring-1 ring-blue-500/20'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 opacity-70 hover:opacity-100'

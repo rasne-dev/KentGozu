@@ -128,8 +128,18 @@ ${userName.trim() || 'Bir Kent Sakini'}
   };
 
   const authWithWhatsApp = authorities.find((a) => a.email === primaryEmail && a.whatsapp) || authorities.find((a) => a.whatsapp);
+  const whatsappMessage = [
+    `*KENTGÖZÜ BİLDİRİMİ*`,
+    `*Konu:* ${subject}`,
+    `*Sorun:* ${issueTitle}`,
+    `*Konum:* ${locationData.fullAddress || districtTitle}`,
+    locationData.latitude && locationData.longitude ? `*Harita Konumu:* https://www.google.com/maps?q=${locationData.latitude},${locationData.longitude}` : null,
+    `*Açıklama:* ${userNote.trim() || selectedIssue?.placeholder || 'Kentsel aksaklık yerinde tespit edilmiştir.'}`,
+    userName.trim() ? `*Bildiren:* ${userName.trim()}` : null
+  ].filter(Boolean).join('\n');
+
   const whatsappUrl = authWithWhatsApp?.whatsapp
-    ? formatWhatsAppUrl(authWithWhatsApp.whatsapp, `*${subject}*\n\n${body}`)
+    ? formatWhatsAppUrl(authWithWhatsApp.whatsapp, whatsappMessage)
     : null;
 
   const whatsappInstitutionName = authWithWhatsApp?.district 

@@ -233,6 +233,7 @@ export default function ReportForm({ preselectedDistrict }) {
             onClick={() => scrollToElement('step-issue-selector')}
             className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
             aria-label="Adım 1: Sorun Türü"
+            aria-current={validationStep === 1 ? 'step' : undefined}
           >
             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isStep1Done ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'
@@ -252,6 +253,7 @@ export default function ReportForm({ preselectedDistrict }) {
             onClick={() => scrollToElement('step-location-picker')}
             className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
             aria-label="Adım 2: Konum"
+            aria-current={validationStep === 2 ? 'step' : undefined}
           >
             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isStep2Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
@@ -271,6 +273,7 @@ export default function ReportForm({ preselectedDistrict }) {
             onClick={() => scrollToElement('step-description')}
             className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
             aria-label="Adım 3: Açıklama"
+            aria-current={validationStep === 3 ? 'step' : undefined}
           >
             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isStep3Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
@@ -290,6 +293,7 @@ export default function ReportForm({ preselectedDistrict }) {
             onClick={() => scrollToElement('step-authority-selector')}
             className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
             aria-label="Adım 4: Yetkili Kurum"
+            aria-current={validationStep === 4 ? 'step' : undefined}
           >
             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isStep4Done ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
@@ -309,6 +313,7 @@ export default function ReportForm({ preselectedDistrict }) {
             onClick={() => scrollToElement('step-disclaimer')}
             className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group shrink-0"
             aria-label="Adım 5: Yasal Onay"
+            aria-current={validationStep === 5 ? 'step' : undefined}
           >
             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
               isDisclaimerAccepted ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
@@ -404,6 +409,7 @@ export default function ReportForm({ preselectedDistrict }) {
             <textarea
               id="report-user-note"
               rows={3}
+              maxLength={1000}
               placeholder={
                 selectedIssue?.placeholder ||
                 'Sorunun tam yeri, boyutu veya trafiğe etkisine dair eklemek istediğiniz detaylar...'
@@ -414,7 +420,9 @@ export default function ReportForm({ preselectedDistrict }) {
             />
 
             <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-              <span>{userNote.length} karakter</span>
+              <span className={userNote.length >= 950 ? 'text-amber-600 dark:text-amber-400 font-semibold' : ''}>
+                {userNote.length} / 1000 karakter
+              </span>
               {selectedIssue && userNote && (
                 <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                   <Sparkles className="w-3 h-3 shrink-0" />

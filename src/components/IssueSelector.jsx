@@ -166,15 +166,21 @@ export default function IssueSelector({ selectedIssue, onSelectIssue, isInvalid 
         </div>
 
         {/* Kategori Sekmeleri */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+        <div 
+          role="tablist" 
+          aria-label="Sorun kategorisi filtreleri"
+          className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs"
+        >
           {CATEGORY_TABS.map((tab) => {
             const isTabActive = selectedCategoryTab === tab.id;
             return (
               <button
                 type="button"
+                role="tab"
+                aria-selected={isTabActive}
                 key={tab.id}
                 onClick={() => setSelectedCategoryTab(tab.id)}
-                className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
+                className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                   isTabActive
                     ? 'bg-blue-600 text-white shadow-xs font-semibold'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'

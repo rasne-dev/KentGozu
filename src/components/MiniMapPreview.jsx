@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Navigation, ZoomIn, ZoomOut, Move, Check, HelpCircle } from 'lucide-react';
+import { MapPin, Navigation } from 'lucide-react';
 import { DISTRICT_COORDINATES } from '../data/istanbulData';
 
 // Özel yüksek çözünürlüklü SVG raptiye ikonu (Vite uyumlu, kırık resim yolu sorunu yaratmaz)
@@ -31,7 +31,13 @@ export default function MiniMapPreview({
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+  const onPositionChangeRef = useRef(onPositionChange);
   const [pinCoords, setPinCoords] = useState(null);
+
+  // Güncel callback'i ref'te tutarak closure sorunlarını engelle
+  useEffect(() => {
+    onPositionChangeRef.current = onPositionChange;
+  }, [onPositionChange]);
 
   // Başlangıç merkez koordinatını hesapla
   const getCenterCoords = () => {
@@ -50,83 +56,10 @@ export default function MiniMapPreview({
     latitude && longitude && !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))
   );
 
-  useEffect(() => {
-    if (!mapContainerRef.current) return;
-
-    const center = getCenterCoords();
-    const zoomLevel = hasPreciseCoords ? 16 : (districtObj ? 14 : 11);
-
-    // Harita zaten kurulu değilse başlat
-    if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current, {
-        center: center,
-        zoom: zoomLevel,
-        zoomControl: false,
-        scrollWheelZoom: false, // Sayfa kaydırmasını engellememek için
-        attributionControl: false
-      });
-
-      // OpenStreetMap altlık katmanı
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        subdomains: ['a', 'b', 'c']
-      }).addTo(map);
-
-      // Yakınlaştırma butonunu sağ alta yerleştir
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-      mapInstanceRef.current = map;
-
-      // Harita üzerine tıklanınca iğneyi o noktaya taşı
-      map.on('click', (e) => {
-        const { lat, lng } = e.latlng;
-        updateMarkerPosition(lat, lng, true);
-      });
-    }
-
-    const map = mapInstanceRef.current;
-
-    // Koordinat varsa veya ilçe değiştiğinde haritayı odakla
-    if (hasPreciseCoords) {
-      const latNum = parseFloat(latitude);
-      const lngNum = parseFloat(longitude);
-      updateMarkerPosition(latNum, lngNum, false);
-      map.setView([latNum, lngNum], 16, { animate: true });
-    } else if (districtObj && DISTRICT_COORDINATES[districtObj.id]) {
-      const districtCoords = DISTRICT_COORDINATES[districtObj.id];
-      map.setView(districtCoords, 14, { animate: true });
-      if (markerRef.current) {
-        map.removeLayer(markerRef.current);
-        markerRef.current = null;
-        setPinCoords(null);
-      }
-    }
-
-    // Harita boyutunu düzelt (render gecikmelerini önler)
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 120);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [districtObj]);
-
-  // Koordinat dışarıdan (GPS) değiştiğinde haritayı güncelle
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-    const latNum = parseFloat(latitude);
-    const lngNum = parseFloat(longitude);
-
-    if (!isNaN(latNum) && !isNaN(lngNum) && latNum > 0 && lngNum > 0) {
-      updateMarkerPosition(latNum, lngNum, false);
-      mapInstanceRef.current.setView([latNum, lngNum], 16, { animate: true });
-    }
-  }, [latitude, longitude]);
-
   // İğne konumunu güncelle ve sürükleme dinleyicilerini bağla
   const updateMarkerPosition = (lat, lng, notifyParent = true) => {
-    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+    if (!map) return;
     const fixedLat = parseFloat(lat.toFixed(6));
     const fixedLng = parseFloat(lng.toFixed(6));
 
@@ -135,15 +68,15 @@ export default function MiniMapPreview({
         icon: createCustomPinIcon(),
         draggable: true,
         autoPan: true
-      }).addTo(mapInstanceRef.current);
+      }).addTo(map);
 
       marker.on('dragend', (event) => {
         const markerPos = event.target.getLatLng();
         const newLat = parseFloat(markerPos.lat.toFixed(6));
         const newLng = parseFloat(markerPos.lng.toFixed(6));
         setPinCoords({ lat: newLat, lng: newLng });
-        if (onPositionChange) {
-          onPositionChange({ latitude: newLat.toString(), longitude: newLng.toString() });
+        if (onPositionChangeRef.current) {
+          onPositionChangeRef.current({ latitude: newLat.toString(), longitude: newLng.toString() });
         }
       });
 
@@ -154,10 +87,93 @@ export default function MiniMapPreview({
 
     setPinCoords({ lat: fixedLat, lng: fixedLng });
 
-    if (notifyParent && onPositionChange) {
-      onPositionChange({ latitude: fixedLat.toString(), longitude: fixedLng.toString() });
+    if (notifyParent && onPositionChangeRef.current) {
+      onPositionChangeRef.current({ latitude: fixedLat.toString(), longitude: fixedLng.toString() });
     }
   };
+
+  // Haritayı yalnızca bir kez kur ve unmount anında temizle (Bellek sızıntısı ve Leaflet container çakışmasını önler)
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    const center = getCenterCoords();
+    const initialZoom = hasPreciseCoords ? 16 : (districtObj ? 14 : 11);
+
+    const map = L.map(mapContainerRef.current, {
+      center: center,
+      zoom: initialZoom,
+      zoomControl: false,
+      scrollWheelZoom: false, // Sayfa kaydırmasını engellememek için
+      attributionControl: false
+    });
+
+    // OpenStreetMap altlık katmanı
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      subdomains: ['a', 'b', 'c']
+    }).addTo(map);
+
+    // Yakınlaştırma kontrolünü sağ alta yerleştir
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    mapInstanceRef.current = map;
+
+    // Haritaya tıklandığında iğneyi o noktaya taşı
+    map.on('click', (e) => {
+      const { lat, lng } = e.latlng;
+      updateMarkerPosition(lat, lng, true);
+    });
+
+    // Başlangıç koordinatı varsa iğneyi yerleştir
+    if (hasPreciseCoords) {
+      const latNum = parseFloat(latitude);
+      const lngNum = parseFloat(longitude);
+      updateMarkerPosition(latNum, lngNum, false);
+    }
+
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 120);
+
+    return () => {
+      clearTimeout(timer);
+      if (markerRef.current) {
+        markerRef.current = null;
+      }
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, []); // Sadece bileşen mount/unmount olduğunda çalışır
+
+  // İlçe değiştiğinde ve kesin koordinat yoksa ilçeye odaklan
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (!hasPreciseCoords && districtObj && DISTRICT_COORDINATES[districtObj.id]) {
+      const districtCoords = DISTRICT_COORDINATES[districtObj.id];
+      map.setView(districtCoords, 14, { animate: true });
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+        setPinCoords(null);
+      }
+    }
+  }, [districtObj, hasPreciseCoords]);
+
+  // Koordinat dışarıdan (GPS / props) değiştiğinde haritayı ve iğneyi güncelle
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const latNum = parseFloat(latitude);
+    const lngNum = parseFloat(longitude);
+
+    if (!isNaN(latNum) && !isNaN(lngNum) && latNum > 0 && lngNum > 0) {
+      updateMarkerPosition(latNum, lngNum, false);
+      map.setView([latNum, lngNum], 16, { animate: true });
+    }
+  }, [latitude, longitude]);
 
   const handleCenterOnMarker = () => {
     if (mapInstanceRef.current && pinCoords) {

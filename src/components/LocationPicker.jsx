@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   MapPin, 
   Navigation, 
@@ -31,8 +31,18 @@ export default function LocationPicker({
   const [geoError, setGeoError] = useState(null);
   const [isManualDetailsOpen, setIsManualDetailsOpen] = useState(false);
   const [showMap, setShowMap] = useState(() => Boolean(locationData.latitude && locationData.longitude));
+  const reverseAbortRef = useRef(null);
 
-  // Haritadan iğne sürüklendiğinde veya tıklandığında konumu güncelle
+  // Unmount anında askıdaki istekleri iptal et
+  useEffect(() => {
+    return () => {
+      if (reverseAbortRef.current) {
+        reverseAbortRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Haritadan iğne sürüklendiğinde veya tıklandığında konumu güncelle (Yarış durumunu engelle)
   const handleMapPositionChange = async ({ latitude, longitude }) => {
     setLocationData((prev) => ({
       ...prev,
@@ -41,11 +51,21 @@ export default function LocationPicker({
       isDetected: true
     }));
 
+    // Önceki tersine adresleme isteğini iptal et
+    if (reverseAbortRef.current) {
+      reverseAbortRef.current.abort();
+    }
+    const controller = new AbortController();
+    reverseAbortRef.current = controller;
+
     // Taşınan noktanın cadde ve mahallesini arka planda tersine sorgula
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&addressdetails=1`,
-        { headers: { 'Accept-Language': 'tr' } }
+        { 
+          headers: { 'Accept-Language': 'tr' },
+          signal: controller.signal
+        }
       );
       if (response.ok) {
         const data = await response.json();
@@ -80,8 +100,10 @@ export default function LocationPicker({
           };
         });
       }
-    } catch {
-      // Sessizce koordinatı koru
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        // Ağ hatasında koordinatı koru
+      }
     }
   };
 
@@ -117,15 +139,24 @@ export default function LocationPicker({
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
+        if (reverseAbortRef.current) {
+          reverseAbortRef.current.abort();
+        }
+        const controller = new AbortController();
+        reverseAbortRef.current = controller;
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         try {
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&addressdetails=1`,
             {
               headers: {
                 'Accept-Language': 'tr'
-              }
+              },
+              signal: controller.signal
             }
           );
+          clearTimeout(timeoutId);
 
           if (!response.ok) {
             throw new Error('Adres bilgisi çözümlenemedi.');
