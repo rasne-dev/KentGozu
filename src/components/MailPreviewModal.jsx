@@ -116,11 +116,13 @@ ${userName.trim() || 'Bir Kent Sakini'}
   };
 
   const handleCopyAll = async () => {
+    localStorage.removeItem('kentgozu-draft-report');
     const allContent = `KİME: ${primaryEmail}${ccEmails ? `\nBİLGİ (CC): ${ccEmails}` : ''}\nKONU: ${subject}\n\n${body}`;
     await handleCopyText(allContent, 'all');
   };
 
   const handleSendMail = () => {
+    localStorage.removeItem('kentgozu-draft-report');
     setShowMailOpeningHint(true);
     setTimeout(() => {
       window.location.href = mailtoUrl;

@@ -11,7 +11,8 @@ import {
   MapPin,
   Camera,
   Building2,
-  Scale
+  Scale,
+  RotateCcw
 } from 'lucide-react';
 import IssueSelector from './IssueSelector';
 import LocationPicker from './LocationPicker';
@@ -78,6 +79,115 @@ export default function ReportForm({ preselectedDistrict }) {
 
   // Modal durumu
   const [isModalOpen, setIsModalOpen] = useState(isMock && isPreview);
+
+  // Yarım kalan taslak kontrolü (Yalnızca gönder/kopyala açılmadan kapatılan oturumlar için)
+  const [draftAlert, setDraftAlert] = useState(() => {
+    if (typeof window === 'undefined' || isMock || preselectedDistrict) return null;
+    try {
+      const saved = localStorage.getItem('kentgozu-draft-report');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const isFresh = Date.now() - (parsed.timestamp || 0) < 48 * 60 * 60 * 1000;
+        const hasData = Boolean(
+          parsed.issueId || 
+          (parsed.userNote && parsed.userNote.trim()) || 
+          parsed.locationData?.latitude || 
+          parsed.locationData?.districtId
+        );
+        if (isFresh && hasData) {
+          return parsed;
+        } else {
+          localStorage.removeItem('kentgozu-draft-report');
+        }
+      }
+    } catch {
+      localStorage.removeItem('kentgozu-draft-report');
+    }
+    return null;
+  });
+
+  // Yarım kalan taslağı geri yükle
+  const handleRestoreDraft = () => {
+    if (!draftAlert) return;
+    if (draftAlert.issueId) {
+      const matched = ISSUE_TYPES.find((i) => i.id === draftAlert.issueId);
+      if (matched) setSelectedIssue(matched);
+    }
+    if (draftAlert.locationData) {
+      const loc = draftAlert.locationData;
+      const matchedDist = loc.districtId ? ISTANBUL_DISTRICTS.find((d) => d.id === loc.districtId) : null;
+      setLocationData({
+        latitude: loc.latitude || '',
+        longitude: loc.longitude || '',
+        districtObj: matchedDist,
+        districtName: loc.districtName || (matchedDist ? matchedDist.district : ''),
+        neighbourhood: loc.neighbourhood || '',
+        road: loc.road || '',
+        buildingNo: loc.buildingNo || '',
+        landmark: loc.landmark || '',
+        fullAddress: loc.fullAddress || '',
+        isDetected: Boolean(loc.isDetected)
+      });
+    }
+    if (draftAlert.roadType) {
+      setRoadType(draftAlert.roadType);
+    }
+    if (draftAlert.userNote) {
+      setUserNote(draftAlert.userNote);
+    }
+    setDraftAlert(null);
+  };
+
+  // Taslağı sil ve sıfırla
+  const handleDiscardDraft = () => {
+    localStorage.removeItem('kentgozu-draft-report');
+    setDraftAlert(null);
+  };
+
+  // Form doldurulurken taslağı yerel hafızaya kaydet (Gönder/kopyala modalı açılmadığı sürece)
+  useEffect(() => {
+    if (isMock || isModalOpen || draftAlert) return;
+
+    const hasContent = Boolean(
+      selectedIssue ||
+      (userNote && userNote.trim()) ||
+      locationData.latitude ||
+      (locationData.fullAddress && !preselectedDistrict)
+    );
+
+    if (!hasContent) {
+      localStorage.removeItem('kentgozu-draft-report');
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      try {
+        const draft = {
+          issueId: selectedIssue?.id || null,
+          locationData: {
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+            districtId: locationData.districtObj?.id || null,
+            districtName: locationData.districtName,
+            neighbourhood: locationData.neighbourhood,
+            road: locationData.road,
+            buildingNo: locationData.buildingNo,
+            landmark: locationData.landmark,
+            fullAddress: locationData.fullAddress,
+            isDetected: locationData.isDetected
+          },
+          roadType,
+          userNote,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('kentgozu-draft-report', JSON.stringify(draft));
+      } catch {
+        // LocalStorage sınır veya erişim kısıtı
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [selectedIssue, locationData, roadType, userNote, isMock, isModalOpen, draftAlert, preselectedDistrict]);
 
   useEffect(() => {
     if (preselectedDistrict) {
@@ -170,6 +280,9 @@ export default function ReportForm({ preselectedDistrict }) {
       return;
     }
 
+    // Gönder/kopyala aşamasına geçildiğinde taslak tamamlanmış kabul edilir ve yerel hafızadan temizlenir
+    localStorage.removeItem('kentgozu-draft-report');
+    setDraftAlert(null);
     setIsModalOpen(true);
   };
 
@@ -221,6 +334,41 @@ export default function ReportForm({ preselectedDistrict }) {
           >
             Tamam
           </button>
+        </div>
+      )}
+
+      {/* Yarım Kalan Bildirim Taslağı Bildirimi */}
+      {draftAlert && (
+        <div className="p-3.5 sm:p-4 bg-blue-50/90 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <RotateCcw className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold text-blue-900 dark:text-blue-100 block">
+                Yarım Kalan Bildirim Taslağınız Var
+              </span>
+              <p className="text-blue-700 dark:text-blue-300 text-[11px]">
+                Önceki oturumunuzda doldurduğunuz ancak henüz göndermediğiniz taslağa kaldığınız yerden devam edebilirsiniz.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={handleRestoreDraft}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl cursor-pointer transition-colors shadow-2xs"
+            >
+              Kaldığım Yerden Devam Et
+            </button>
+            <button
+              type="button"
+              onClick={handleDiscardDraft}
+              className="px-2.5 py-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 font-medium cursor-pointer"
+            >
+              Temizle
+            </button>
+          </div>
         </div>
       )}
 
