@@ -8,8 +8,17 @@ export default function Header({ activeTab, setActiveTab, onOpenLegal, onOpenOnb
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Logo & Slogan */}
           <div 
+            role="button"
+            tabIndex={0}
+            aria-label="KentGözü Ana Sayfa - Bildirim Formu"
             onClick={() => setActiveTab('report')}
-            className="flex items-center gap-3 cursor-pointer select-none group"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setActiveTab('report');
+              }
+            }}
+            className="flex items-center gap-3 cursor-pointer select-none group rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
               <Eye className="w-6 h-6 stroke-[2.2]" />
@@ -32,8 +41,10 @@ export default function Header({ activeTab, setActiveTab, onOpenLegal, onOpenOnb
           {/* Navigation & Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full scrollbar-none py-0.5">
             <button
+              type="button"
               onClick={() => setActiveTab('report')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
+              aria-current={activeTab === 'report' ? 'page' : undefined}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 ${
                 activeTab === 'report'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -44,8 +55,10 @@ export default function Header({ activeTab, setActiveTab, onOpenLegal, onOpenOnb
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('directory')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
+              aria-current={activeTab === 'directory' ? 'page' : undefined}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 ${
                 activeTab === 'directory'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'

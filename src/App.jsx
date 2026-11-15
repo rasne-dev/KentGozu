@@ -8,6 +8,7 @@ import MobileAppPrompt from './components/MobileAppPrompt';
 import OnboardingModal from './components/OnboardingModal';
 import { Eye, Scale, Smartphone, ShieldCheck, HelpCircle } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
+import { safeGetItem, safeSetItem } from './utils/helpers';
 
 export default function App() {
   const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -23,7 +24,7 @@ export default function App() {
     if (forceGuide) return true;
     if (isScreenshot) return false;
     if (typeof window !== 'undefined') {
-      return !localStorage.getItem('kentgozu-onboarding-seen');
+      return !safeGetItem('kentgozu-onboarding-seen');
     }
     return false;
   });
@@ -40,7 +41,7 @@ export default function App() {
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
       window.innerWidth < 768
     );
-    const alreadySeen = localStorage.getItem('kentgozu-apk-prompt-seen');
+    const alreadySeen = safeGetItem('kentgozu-apk-prompt-seen');
 
     if (isMobile && !isNative && !alreadySeen && !isOnboardingOpen) {
       const timer = setTimeout(() => setShowApkPrompt(true), 800);
@@ -55,7 +56,7 @@ export default function App() {
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
       window.innerWidth < 768
     );
-    const alreadySeen = localStorage.getItem('kentgozu-apk-prompt-seen');
+    const alreadySeen = safeGetItem('kentgozu-apk-prompt-seen');
     if (isMobile && !isNative && !alreadySeen) {
       setTimeout(() => setShowApkPrompt(true), 600);
     }
@@ -63,18 +64,20 @@ export default function App() {
 
   // Dark mode state
   const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('kentgozu-theme');
+    const saved = safeGetItem('kentgozu-theme');
     if (saved) return saved === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return typeof window !== 'undefined'
+      ? (window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? false)
+      : false;
   });
 
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('kentgozu-theme', 'dark');
+      safeSetItem('kentgozu-theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('kentgozu-theme', 'light');
+      safeSetItem('kentgozu-theme', 'light');
     }
   }, [darkMode]);
 

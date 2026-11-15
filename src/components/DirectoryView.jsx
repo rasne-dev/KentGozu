@@ -25,7 +25,7 @@ import {
   ISKI_INFO,
   ELECTRICITY_COMPANIES
 } from '../data/istanbulData';
-import { normalizeTurkish, formatWhatsAppUrl, getCleanPhoneNumber } from '../utils/helpers';
+import { normalizeTurkish, formatWhatsAppUrl, getCleanPhoneNumber, copyTextToClipboard } from '../utils/helpers';
 
 export default function DirectoryView({ onSelectDistrictForReport }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,12 +39,10 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
 
   const handleCopyEmail = async (email, e) => {
     e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(email);
+    const ok = await copyTextToClipboard(email);
+    if (ok) {
       setCopiedEmail(email);
       setTimeout(() => setCopiedEmail(null), 2000);
-    } catch (err) {
-      console.error('Kopyalanamadı', err);
     }
   };
 
@@ -292,22 +290,24 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             {/* Arama */}
-            <div className="relative">
+            <div className="relative w-full sm:w-56">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
               <input
                 type="text"
+                aria-label="İlçe veya telefon ara"
                 placeholder="İlçe veya telefon ara..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-7 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-100 w-48 sm:w-56"
+                className="pl-8 pr-7 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-100 w-full"
               />
               {searchTerm && (
                 <button
                   type="button"
+                  aria-label="Aramayı temizle"
                   onClick={() => setSearchTerm('')}
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-1.5 top-1.5 cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-1.5 top-1.5 cursor-pointer rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -315,7 +315,7 @@ export default function DirectoryView({ onSelectDistrictForReport }) {
             </div>
 
             {/* Yakaya göre filtre */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs">
+            <div className="flex items-center justify-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs shrink-0">
               <button
                 type="button"
                 onClick={() => setSideFilter('ALL')}

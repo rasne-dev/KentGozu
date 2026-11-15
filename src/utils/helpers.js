@@ -71,10 +71,106 @@ export function formatWhatsAppUrl(rawPhone, text = '') {
 export function getCleanPhoneNumber(rawPhone) {
   if (!rawPhone) return '';
   const str = rawPhone.toString().trim();
-  // ALO 153, ALO 159, ALO 185, ALO 186 gibi kısa hat kontrolü
-  const shortMatch = str.match(/\b(15[39]|18[56])\b/);
+  // ALO 153, ALO 159, ALO 185, ALO 186 gibi kısa hat kontrolü (satır başı veya ALO öbeği ile sınırlı)
+  const shortMatch = str.match(/^(?:alo\s*)?(15[39]|18[56])\b/i);
   if (shortMatch) return shortMatch[1];
   // Eğik çizgi veya tireyle ayrılmış ilk kısmı al
   const firstPart = str.split(/[\/|]/)[0].trim();
   return firstPart.replace(/[^0-9]/g, '');
+}
+
+/**
+ * Kısıtlı tarayıcı/WebView ortamlarında çökme olmadan localStorage okuma yapar.
+ */
+export function safeGetItem(key, fallback = null) {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return fallback;
+    const val = window.localStorage.getItem(key);
+    return val !== null ? val : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
+ * Kısıtlı tarayıcı/WebView ortamlarında çökme olmadan localStorage yazma yapar.
+ */
+export function safeSetItem(key, value) {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return false;
+    window.localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Kısıtlı tarayıcı/WebView ortamlarında çökme olmadan localStorage silme yapar.
+ */
+export function safeRemoveItem(key) {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return false;
+    window.localStorage.removeItem(key);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Clipboard API'nin engellendiği WebView veya güvensiz ortamlarda yedek yöntemle panoya kopyalar.
+ */
+export async function copyTextToClipboard(text) {
+  if (!text) return false;
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fallback mekanizmasına geç
+  }
+
+  try {
+    if (typeof document === 'undefined') return false;
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    textarea.style.pointerEvents = 'none';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Resmi Türk adresi hiyerarşisine göre açık adres metnini birleştirir.
+ */
+export function composeTurkishAddress({
+  neighbourhood = '',
+  road = '',
+  buildingNo = '',
+  landmark = '',
+  districtName = ''
+}) {
+  const cleanBuilding = buildingNo
+    ? (/^\s*no\s*:/i.test(buildingNo) ? buildingNo.trim() : `No: ${buildingNo.trim()}`)
+    : '';
+  const parts = [
+    neighbourhood?.trim(),
+    road?.trim(),
+    cleanBuilding,
+    landmark?.trim() ? `(${landmark.trim()})` : '',
+    districtName?.trim() ? `${districtName.trim()} / İstanbul` : 'İstanbul'
+  ].filter(Boolean);
+
+  return parts.join(', ');
 }

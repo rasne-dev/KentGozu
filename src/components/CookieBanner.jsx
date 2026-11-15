@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Cookie, Check, ShieldCheck } from 'lucide-react';
+import { safeGetItem, safeSetItem } from '../utils/helpers';
 
 export default function CookieBanner({ onOpenLegal, suppressed = false }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -9,7 +10,7 @@ export default function CookieBanner({ onOpenLegal, suppressed = false }) {
       setIsVisible(false);
       return;
     }
-    const consent = localStorage.getItem('kentgozu-cookie-consent');
+    const consent = safeGetItem('kentgozu-cookie-consent');
     if (!consent) {
       // İlk ziyarette küçük bir gecikmeyle göster
       const timer = setTimeout(() => setIsVisible(true), 600);
@@ -18,7 +19,7 @@ export default function CookieBanner({ onOpenLegal, suppressed = false }) {
   }, [suppressed]);
 
   const handleAccept = () => {
-    localStorage.setItem('kentgozu-cookie-consent', 'accepted');
+    safeSetItem('kentgozu-cookie-consent', 'accepted');
     setIsVisible(false);
   };
 

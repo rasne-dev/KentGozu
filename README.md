@@ -13,7 +13,7 @@
 Vatandaşların sokakta karşılaştığı **yol çukurları, bozuk kaldırımlar, açık mazgallar, devrilmiş tabelalar veya yanmayan sokak lambaları** gibi sorunları hızlıca ilgili resmi makamlara iletmesini sağlar.
 
 1. **Sorun Türünü Seçin:** Yol çukuru, kaldırım hasarı, mazgal, tabela, aydınlatma direği vb.
-2. **Konum Belirleme:** Tek tıkla GPS koordinatları alınır; OpenStreetMap ile mahalle, cadde ve ilçe otomatik tespit edilir.
+2. **Konum Belirleme:** Tek tıkla GPS koordinatları alınır veya sokak/mahalle aramasıyla harita üzerinde nokta seçilir; OpenStreetMap ile mahalle, cadde ve ilçe otomatik tespit edilir.
 3. **Akıllı Yetki Eşleştirme:**
    * **Otoyol / TEM / E-5 (D-100):** ➡️ **Karayolları Genel Müdürlüğü (KGM 1. Bölge)**
    * **Ana Cadde / Bulvar / Meydan:** ➡️ **İstanbul Büyükşehir Belediyesi (İBB Beyaz Masa 153)**

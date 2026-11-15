@@ -16,6 +16,7 @@ import {
   FileCheck,
   Scale
 } from 'lucide-react';
+import { safeSetItem } from '../utils/helpers';
 
 const ONBOARDING_STEPS = [
   {
@@ -226,7 +227,7 @@ export default function OnboardingModal({ isOpen, onClose }) {
   };
 
   const handleComplete = () => {
-    localStorage.setItem('kentgozu-onboarding-seen', 'true');
+    safeSetItem('kentgozu-onboarding-seen', 'true');
     onClose();
   };
 

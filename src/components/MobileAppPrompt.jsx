@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { Smartphone, Download, X, ArrowRight, ShieldCheck, Zap, MapPin } from 'lucide-react';
+import { safeSetItem } from '../utils/helpers';
 
 export default function MobileAppPrompt({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        localStorage.setItem('kentgozu-apk-prompt-seen', 'true');
+        safeSetItem('kentgozu-apk-prompt-seen', 'true');
         onClose();
       }
     };
@@ -17,13 +18,13 @@ export default function MobileAppPrompt({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const handleDownload = () => {
-    localStorage.setItem('kentgozu-apk-prompt-seen', 'true');
-    window.open('https://github.com/rasne-dev/KentGozu/releases/latest', '_blank');
+    safeSetItem('kentgozu-apk-prompt-seen', 'true');
+    window.open('https://github.com/rasne-dev/KentGozu/releases/latest', '_blank', 'noopener,noreferrer');
     onClose();
   };
 
   const handleDismiss = () => {
-    localStorage.setItem('kentgozu-apk-prompt-seen', 'true');
+    safeSetItem('kentgozu-apk-prompt-seen', 'true');
     onClose();
   };
 

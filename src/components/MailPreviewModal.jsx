@@ -11,9 +11,11 @@ import {
   Info,
   Sparkles,
   ChevronDown,
-  Camera
+  Camera,
+  Share2
 } from 'lucide-react';
-import { formatWhatsAppUrl } from '../utils/helpers';
+import { formatWhatsAppUrl, copyTextToClipboard, safeRemoveItem } from '../utils/helpers';
+import { openNativeOrWebMail, canUseSystemShare, shareReportContent } from '../utils/nativeBridge';
 
 export default function MailPreviewModal({
   isOpen,
@@ -43,6 +45,15 @@ export default function MailPreviewModal({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showOtherOptions]);
 
+  // Modal açılıp kapandığında geçici bildirim durumlarını sıfırla
+  useEffect(() => {
+    if (!isOpen) {
+      setShowMailOpeningHint(false);
+      setCopiedField(null);
+      setShowOtherOptions(false);
+    }
+  }, [isOpen]);
+
   // Escape tuşu ile pencereyi kapatma
   useEffect(() => {
     if (!isOpen) return;
@@ -57,6 +68,7 @@ export default function MailPreviewModal({
 
   const primaryEmail = selectedEmails[0] || 'beyazmasa@ibb.gov.tr';
   const ccEmails = selectedEmails.slice(1).join(',');
+  const encodedCcEmails = selectedEmails.slice(1).map((e) => encodeURIComponent(e)).join(',');
 
   const districtTitle = locationData.districtName || 'İstanbul';
   const issueTitle = selectedIssue?.title || 'Kentsel Sorun / Yol Bozukluğu';
@@ -97,37 +109,53 @@ Gereğinin yapılmasını ve konu hakkında tarafıma e-posta yoluyla bilgi veri
 ${userName.trim() || 'Bir Kent Sakini'}
 (KentGözü ile hazırlanmıştır)`;
 
-  const mailtoUrl = `mailto:${primaryEmail}?${ccEmails ? `cc=${encodeURIComponent(ccEmails)}&` : ''}subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const mailtoUrl = `mailto:${primaryEmail}?${encodedCcEmails ? `cc=${encodedCcEmails}&` : ''}subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-  const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(primaryEmail)}${ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : ''}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(primaryEmail)}${encodedCcEmails ? `&cc=${encodedCcEmails}` : ''}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-  const outlookWebUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(primaryEmail)}${ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : ''}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const outlookWebUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(primaryEmail)}${encodedCcEmails ? `&cc=${encodedCcEmails}` : ''}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-  const yahooWebUrl = `https://compose.mail.yahoo.com/?to=${encodeURIComponent(primaryEmail)}${ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : ''}&subj=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const yahooWebUrl = `https://compose.mail.yahoo.com/?to=${encodeURIComponent(primaryEmail)}${encodedCcEmails ? `&cc=${encodedCcEmails}` : ''}&subj=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   const handleCopyText = async (text, fieldName) => {
-    try {
-      await navigator.clipboard.writeText(text);
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
       setCopiedField(fieldName);
       setTimeout(() => setCopiedField(null), 2000);
-    } catch (err) {
-      console.error('Kopyalanamadı', err);
     }
   };
 
   const handleCopyAll = async () => {
-    localStorage.removeItem('kentgozu-draft-report');
+    safeRemoveItem('kentgozu-draft-report');
     const allContent = `KİME: ${primaryEmail}${ccEmails ? `\nBİLGİ (CC): ${ccEmails}` : ''}\nKONU: ${subject}\n\n${body}`;
     await handleCopyText(allContent, 'all');
   };
 
   const handleSendMail = () => {
-    localStorage.removeItem('kentgozu-draft-report');
+    safeRemoveItem('kentgozu-draft-report');
     setShowMailOpeningHint(true);
     setTimeout(() => {
-      window.location.href = mailtoUrl;
+      openNativeOrWebMail({
+        toList: [primaryEmail],
+        ccList: selectedEmails.slice(1),
+        subject,
+        body,
+        fallbackMailtoUrl: mailtoUrl
+      });
     }, 100);
   };
+
+  const handleShareReport = async () => {
+    safeRemoveItem('kentgozu-draft-report');
+    const allContent = `KİME: ${primaryEmail}${ccEmails ? `\nBİLGİ (CC): ${ccEmails}` : ''}\nKONU: ${subject}\n\n${body}`;
+    try {
+      await shareReportContent({ title: subject, text: allContent });
+    } catch {
+      // Kullanıcı paylaşımı iptal ederse veya desteklenmezse sessiz geç
+    }
+  };
+
+  const showShareButton = canUseSystemShare();
 
   const authWithWhatsApp = authorities.find((a) => a.email === primaryEmail && a.whatsapp) || authorities.find((a) => a.whatsapp);
   const whatsappMessage = [
@@ -384,6 +412,19 @@ ${userName.trim() || 'Bir Kent Sakini'}
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Gmail Web</span>
             </a>
+
+            {/* Sistem Paylaşımı (Android Native / Mobil Web Share) */}
+            {showShareButton && (
+              <button
+                type="button"
+                onClick={handleShareReport}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-700 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs cursor-pointer"
+                title="Bildirimi sistem paylaşım menüsüyle paylaş"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Paylaş</span>
+              </button>
+            )}
 
             {/* WhatsApp İhbar Butonu (Varsa doğrudan görünür) */}
             {whatsappUrl && (

@@ -20,7 +20,7 @@ import AuthoritySelector from './AuthoritySelector';
 import MailPreviewModal from './MailPreviewModal';
 import { determineResponsibleAuthorities, ISTANBUL_DISTRICTS } from '../data/istanbulData';
 import { ISSUE_TYPES } from '../data/issueTypes';
-import { scrollToElement } from '../utils/helpers';
+import { scrollToElement, safeGetItem, safeSetItem, safeRemoveItem } from '../utils/helpers';
 
 export default function ReportForm({ preselectedDistrict }) {
   const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -56,10 +56,7 @@ export default function ReportForm({ preselectedDistrict }) {
   const [userNote, setUserNote] = useState(isMock ? 'Bağdat Caddesi üzerinde sağ şeritte yaklaşık 20 cm derinliğinde, araç ve motosiklet trafiğini tehlikeye atan derin bir çukur oluşmuştur. Acilen asfalt yama yapılması gerekmektedir.' : '');
   const [userName, setUserName] = useState(() => {
     if (isMock) return 'Vatandaş Bildirimi';
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('kentgozu-user-name') || '';
-    }
-    return '';
+    return safeGetItem('kentgozu-user-name', '');
   });
   const [isDisclaimerAccepted, setIsDisclaimerAccepted] = useState(isMock);
   const [districtAlertDismissed, setDistrictAlertDismissed] = useState(false);
@@ -84,7 +81,7 @@ export default function ReportForm({ preselectedDistrict }) {
   const [draftAlert, setDraftAlert] = useState(() => {
     if (typeof window === 'undefined' || isMock || preselectedDistrict) return null;
     try {
-      const saved = localStorage.getItem('kentgozu-draft-report');
+      const saved = safeGetItem('kentgozu-draft-report');
       if (saved) {
         const parsed = JSON.parse(saved);
         const isFresh = Date.now() - (parsed.timestamp || 0) < 48 * 60 * 60 * 1000;
@@ -97,11 +94,11 @@ export default function ReportForm({ preselectedDistrict }) {
         if (isFresh && hasData) {
           return parsed;
         } else {
-          localStorage.removeItem('kentgozu-draft-report');
+          safeRemoveItem('kentgozu-draft-report');
         }
       }
     } catch {
-      localStorage.removeItem('kentgozu-draft-report');
+      safeRemoveItem('kentgozu-draft-report');
     }
     return null;
   });
@@ -140,7 +137,7 @@ export default function ReportForm({ preselectedDistrict }) {
 
   // Taslağı sil ve sıfırla
   const handleDiscardDraft = () => {
-    localStorage.removeItem('kentgozu-draft-report');
+    safeRemoveItem('kentgozu-draft-report');
     setDraftAlert(null);
   };
 
@@ -156,34 +153,30 @@ export default function ReportForm({ preselectedDistrict }) {
     );
 
     if (!hasContent) {
-      localStorage.removeItem('kentgozu-draft-report');
+      safeRemoveItem('kentgozu-draft-report');
       return;
     }
 
     const timer = setTimeout(() => {
-      try {
-        const draft = {
-          issueId: selectedIssue?.id || null,
-          locationData: {
-            latitude: locationData.latitude,
-            longitude: locationData.longitude,
-            districtId: locationData.districtObj?.id || null,
-            districtName: locationData.districtName,
-            neighbourhood: locationData.neighbourhood,
-            road: locationData.road,
-            buildingNo: locationData.buildingNo,
-            landmark: locationData.landmark,
-            fullAddress: locationData.fullAddress,
-            isDetected: locationData.isDetected
-          },
-          roadType,
-          userNote,
-          timestamp: Date.now()
-        };
-        localStorage.setItem('kentgozu-draft-report', JSON.stringify(draft));
-      } catch {
-        // LocalStorage sınır veya erişim kısıtı
-      }
+      const draft = {
+        issueId: selectedIssue?.id || null,
+        locationData: {
+          latitude: locationData.latitude,
+          longitude: locationData.longitude,
+          districtId: locationData.districtObj?.id || null,
+          districtName: locationData.districtName,
+          neighbourhood: locationData.neighbourhood,
+          road: locationData.road,
+          buildingNo: locationData.buildingNo,
+          landmark: locationData.landmark,
+          fullAddress: locationData.fullAddress,
+          isDetected: locationData.isDetected
+        },
+        roadType,
+        userNote,
+        timestamp: Date.now()
+      };
+      safeSetItem('kentgozu-draft-report', JSON.stringify(draft));
     }, 600);
 
     return () => clearTimeout(timer);
@@ -191,16 +184,28 @@ export default function ReportForm({ preselectedDistrict }) {
 
   useEffect(() => {
     if (preselectedDistrict) {
+      setDistrictAlertDismissed(false);
       setLocationData((prev) => {
-        let newFullAddress = prev.fullAddress;
-        if (!prev.fullAddress || prev.fullAddress.endsWith('İstanbul')) {
-          newFullAddress = `${preselectedDistrict.district} / İstanbul`;
+        const isDifferentDistrict = prev.districtObj && prev.districtObj.id !== preselectedDistrict.id;
+        if (isDifferentDistrict) {
+          return {
+            latitude: '',
+            longitude: '',
+            districtObj: preselectedDistrict,
+            districtName: preselectedDistrict.district,
+            neighbourhood: '',
+            road: '',
+            buildingNo: '',
+            landmark: '',
+            fullAddress: `${preselectedDistrict.district} / İstanbul`,
+            isDetected: false
+          };
         }
         return {
           ...prev,
           districtObj: preselectedDistrict,
           districtName: preselectedDistrict.district,
-          fullAddress: newFullAddress
+          fullAddress: prev.fullAddress || `${preselectedDistrict.district} / İstanbul`
         };
       });
       clearValidation();
@@ -281,7 +286,7 @@ export default function ReportForm({ preselectedDistrict }) {
     }
 
     // Gönder/kopyala aşamasına geçildiğinde taslak tamamlanmış kabul edilir ve yerel hafızadan temizlenir
-    localStorage.removeItem('kentgozu-draft-report');
+    safeRemoveItem('kentgozu-draft-report');
     setDraftAlert(null);
     setIsModalOpen(true);
   };
@@ -291,6 +296,17 @@ export default function ReportForm({ preselectedDistrict }) {
   const isStep2Done = Boolean(locationData.districtObj || roadType === 'highway');
   const isStep3Done = userNote.trim().length > 0;
   const isStep4Done = selectedEmails.length > 0;
+  const isFormReady = isStep1Done && isStep2Done && isStep4Done && isDisclaimerAccepted;
+
+  const missingSteps = [
+    !isStep1Done && 'Adım 1 (Sorun Türü)',
+    !isStep2Done && 'Adım 2 (İlçe)',
+    !isStep4Done && 'Adım 4 (Yetkili Kurum)',
+    !isDisclaimerAccepted && 'Adım 5 (Yasal Onay)'
+  ].filter(Boolean);
+
+  const sampleText = selectedIssue ? (selectedIssue.placeholder || '').replace(/^Örn:\s*/, '').trim() : '';
+  const isUsingSampleNote = Boolean(sampleText && userNote.trim() === sampleText);
 
   return (
     <div className="space-y-6">
@@ -571,7 +587,7 @@ export default function ReportForm({ preselectedDistrict }) {
               <span className={userNote.length >= 950 ? 'text-amber-600 dark:text-amber-400 font-semibold' : ''}>
                 {userNote.length} / 1000 karakter
               </span>
-              {selectedIssue && userNote && (
+              {isUsingSampleNote && (
                 <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                   <Sparkles className="w-3 h-3 shrink-0" />
                   <span>Örnek açıklama eklendi; dilediğiniz gibi düzenleyebilirsiniz.</span>
@@ -600,9 +616,7 @@ export default function ReportForm({ preselectedDistrict }) {
                   onChange={(e) => {
                     const val = e.target.value;
                     setUserName(val);
-                    if (typeof window !== 'undefined') {
-                      localStorage.setItem('kentgozu-user-name', val);
-                    }
+                    safeSetItem('kentgozu-user-name', val);
                   }}
                   className="w-full pl-8 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
@@ -665,16 +679,16 @@ export default function ReportForm({ preselectedDistrict }) {
               Hazırlanan Taslak: {selectedEmails.length} Yetkili Kuruma Gönderilecek
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              {isDisclaimerAccepted
+              {isFormReady
                 ? 'E-posta istemciniz açılacak; kontrol edip tek tıkla göndereceksiniz.'
-                : 'Devam etmek için lütfen Adım 5 onay kutusunu işaretleyiniz.'}
+                : `Devam etmek için eksik adımları tamamlayın: ${missingSteps.join(', ')}.`}
             </span>
           </div>
 
           <button
             type="submit"
             className={`w-full sm:w-auto px-6 py-3.5 text-white text-sm font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-              isDisclaimerAccepted
+              isFormReady
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/25 hover:scale-[1.01] active:scale-[0.99]'
                 : 'bg-slate-500 hover:bg-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600 shadow-none'
             }`}

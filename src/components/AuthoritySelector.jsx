@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Building2, Check, Mail, Phone, ShieldCheck, Info, MessageSquare } from 'lucide-react';
 import { getCleanPhoneNumber, formatWhatsAppUrl } from '../utils/helpers';
 
@@ -9,7 +9,28 @@ export default function AuthoritySelector({
   onSetSelectedEmails,
   isInvalid = false
 }) {
+  const [minSelectionHint, setMinSelectionHint] = useState(false);
+  const hintTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    };
+  }, []);
+
+  const handleToggleEmail = (email) => {
+    if (selectedEmails.includes(email) && selectedEmails.length === 1) {
+      setMinSelectionHint(true);
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+      hintTimerRef.current = setTimeout(() => setMinSelectionHint(false), 2500);
+      return;
+    }
+    setMinSelectionHint(false);
+    toggleEmailSelection(email);
+  };
+
   const selectAll = () => {
+    setMinSelectionHint(false);
     if (onSetSelectedEmails) {
       onSetSelectedEmails(authorities.map((a) => a.email));
     } else {
@@ -22,6 +43,7 @@ export default function AuthoritySelector({
   };
 
   const selectOnlyPrimary = () => {
+    setMinSelectionHint(false);
     const primary = authorities.find((a) => a.isPrimary) || authorities[0];
     if (primary) {
       if (onSetSelectedEmails) {
@@ -83,6 +105,16 @@ export default function AuthoritySelector({
         )}
       </div>
 
+      {minSelectionHint && (
+        <div
+          role="status"
+          className="px-3 py-2 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 rounded-xl text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2 animate-in fade-in duration-150"
+        >
+          <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <span>En az bir yetkili kurum seçili kalmalıdır.</span>
+        </div>
+      )}
+
       {authorities.length === 0 ? (
         <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 text-center flex items-center justify-center gap-2">
           <Info className="w-4 h-4 text-blue-500" />
@@ -102,11 +134,11 @@ export default function AuthoritySelector({
                 aria-checked={isChecked}
                 aria-label={`${auth.name} (${auth.role || 'Yetkili Kurum'}) seçimi`}
                 tabIndex={0}
-                onClick={() => toggleEmailSelection(auth.email)}
+                onClick={() => handleToggleEmail(auth.email)}
                 onKeyDown={(e) => {
                   if (e.key === ' ' || e.key === 'Enter') {
                     e.preventDefault();
-                    toggleEmailSelection(auth.email);
+                    handleToggleEmail(auth.email);
                   }
                 }}
                 className={`p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${

@@ -309,7 +309,7 @@ export const ISTANBUL_DISTRICTS = [
     district: 'Gaziosmanpaşa',
     side: 'Avrupa',
     email: 'gop@gaziosmanpasa.bel.tr',
-    phone: '444 19 84',
+    phone: '444 0 467',
     whatsapp: '0530 444 19 84',
     website: 'https://www.gaziosmanpasa.bel.tr'
   },
@@ -626,18 +626,18 @@ export function determineResponsibleAuthorities({
     }
   } else if (issueTypeId === 'altyapi_kazi') {
     // Kapatılmamış altyapı kazısı (İBB AYKOME koordinasyonu)
-    selectedAuthorities.unshift({
-      ...IBB_INFO,
-      role: 'Altyapı Denetim (İBB AYKOME - Altyapı Koordinasyon)',
-      isPrimary: true
-    });
     if (districtObj) {
-      selectedAuthorities.push({
+      selectedAuthorities.unshift({
         ...districtObj,
         role: `Saha Denetim (${districtObj.district} Bel. Fen İşleri)`,
         isPrimary: false
       });
     }
+    selectedAuthorities.unshift({
+      ...IBB_INFO,
+      role: 'Altyapı Denetim (İBB AYKOME - Altyapı Koordinasyon)',
+      isPrimary: true
+    });
   } else if (issueTypeId === 'metruk_bina') {
     // Metruk bina ve yıkılma tehlikesi
     if (districtObj) {
@@ -666,6 +666,11 @@ export function determineResponsibleAuthorities({
       seen.add(auth.email);
       uniqueList.push(auth);
     }
+  }
+
+  // İlçe seçilmeden özel ihtisas sorunu seçildiğinde en az bir birincil yetkili kalmasını garantile
+  if (uniqueList.length > 0 && !uniqueList.some((a) => a.isPrimary)) {
+    uniqueList[0] = { ...uniqueList[0], isPrimary: true };
   }
 
   return uniqueList;

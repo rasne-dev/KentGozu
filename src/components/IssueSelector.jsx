@@ -149,6 +149,7 @@ export default function IssueSelector({ selectedIssue, onSelectIssue, isInvalid 
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
+            aria-label="Sorun türü ara"
             placeholder="Sorun türü ara (örn: çukur, lamba, mazgal, köpek, ağaç, moloz)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -157,8 +158,9 @@ export default function IssueSelector({ selectedIssue, onSelectIssue, isInvalid 
           {searchTerm && (
             <button
               type="button"
+              aria-label="Aramayı temizle"
               onClick={() => setSearchTerm('')}
-              className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-2.5 top-2 cursor-pointer"
+              className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-2.5 top-2 cursor-pointer rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               <X className="w-4 h-4" />
             </button>
@@ -219,8 +221,9 @@ export default function IssueSelector({ selectedIssue, onSelectIssue, isInvalid 
               <button
                 type="button"
                 key={issue.id}
+                aria-pressed={isSelected}
                 onClick={() => onSelectIssue(issue)}
-                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between gap-1.5 sm:gap-2 cursor-pointer ${
+                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between gap-1.5 sm:gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                   isSelected
                     ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/60 shadow-xs ring-2 ring-blue-500/30'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100/60 dark:hover:bg-slate-800'
